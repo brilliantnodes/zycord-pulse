@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zycord Pulse — independent live statistics for the Zycord blockchain</title>
+<link rel="canonical" href="https://pulse.brilliantnodes.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Zycord Pulse — independent statistics for the Zycord mainnet">
+<meta property="og:description" content="Usage, network security, development, mining and the road to staking, read from every block on our own Zycord node. Open data, MIT licence.">
+<meta property="og:url" content="https://pulse.brilliantnodes.com/">
+<meta name="description" content="Independent, open statistics for the Zycord mainnet: usage, network security, development activity, mining and the road to staking. Every number is read from a full node.">
+<style>
+:root{--bg:#f7f8fa;--panel:#ffffff;--fg:#14171f;--muted:#5d6475;--line:#e3e6ec;--grid:#eceef2;--axis:#c9cdd6;--c1:#3b6cff;--c2:#f08a24;--c3:#12a37f;--ok:#12a37f;--bad:#d64545;--ref:#8a90a0;--shade:#3b6cff;--shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.06);--r:14px;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1017;--panel:#151a23;--fg:#e9ecf2;--muted:#9aa2b4;--line:#252c39;--grid:#1f2531;--axis:#3a4253;--c1:#6b8fff;--c2:#ffa54d;--c3:#2fcf9f;--ok:#2fcf9f;--bad:#ff6b6b;--ref:#7b8396;--shade:#6b8fff;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25)}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--c1)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0;font-size:13px;color:var(--muted)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--fg);font-size:15px}
+.logo{width:26px;height:26px;border-radius:8px;background:conic-gradient(from 200deg,var(--c1),var(--c3),var(--c2),var(--c1));box-shadow:inset 0 0 0 6px var(--panel)}
+.hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow);padding:34px 28px 26px}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto auto;width:520px;height:520px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c1) 22%,transparent),transparent);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:auto auto -45% -10%;width:420px;height:420px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c3) 16%,transparent),transparent);pointer-events:none}
+.hero>*{position:relative}
+.eyebrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--muted);margin:0 0 12px}
+.live{display:inline-flex;align-items:center;gap:7px;padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-variant-numeric:tabular-nums;font-weight:500}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent)}
+@media (prefers-reduced-motion:no-preference){.live i{animation:pulse 2s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 55%,transparent)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5vw,54px);line-height:1.05;margin:0 0 10px;letter-spacing:-.01em}
+.lede{font-size:17px;max-width:46em;margin:0}
+.lede b{font-variant-numeric:tabular-nums}
+.cov{font-size:13px;color:var(--muted);margin:10px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:24px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 10px}
+.lab{font-size:12.5px;color:var(--muted);margin:0}
+.big{font-family:var(--serif);font-weight:400;font-size:30px;font-variant-numeric:tabular-nums;margin:4px 0 0;line-height:1.15}
+.kpi .big{font-size:34px}
+.chg{font-size:12.5px;color:var(--muted);margin:2px 0 0}
+.good{color:var(--ok)}.bad{color:var(--bad)}
+.spark{height:40px;margin-top:6px}
+.nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(8px);-webkit-backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line);margin:22px 0 0}
+.nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 20px;scrollbar-width:none}
+.nav a,.seg button{flex:none;font:inherit;font-size:13px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer;text-decoration:none;white-space:nowrap}
+.nav a:hover,.seg button:hover{border-color:var(--axis)}
+.nav a.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.seg{display:inline-flex;gap:4px}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+section.sec{scroll-margin-top:62px;padding-top:34px}
+.sechead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+h2{font-family:var(--serif);font-weight:400;font-size:30px;margin:0;letter-spacing:-.01em}
+.secsub{font-size:14px;color:var(--muted);margin:3px 0 0;max-width:52em}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;margin-bottom:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px}
+.wide{grid-column:1/-1}
+h3{font-size:15.5px;font-weight:600;margin:0 0 4px}
+.sub{font-size:13px;color:var(--muted);margin:0 0 10px}
+.chart{min-height:220px;position:relative}
+.cw{position:relative}
+.axis text{fill:var(--muted);font-size:11.5px;font-family:var(--sans)}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;padding:7px 10px;font-size:12.5px;white-space:nowrap;top:0;z-index:3;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .08s}
+.tip .d{color:var(--muted);margin-bottom:2px}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);margin:0 0 8px;flex-wrap:wrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.empty{font-size:13px;color:var(--muted);padding:30px 0}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12.5px}
+.tw{overflow-x:auto}
+.pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:var(--bg)}
+.pill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--bg)}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--c3)}
+.bar{margin:6px 0 14px}
+.bar .lbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.bar .lbl span:last-child{color:var(--muted);font-variant-numeric:tabular-nums}
+.track{height:10px;border-radius:6px;background:var(--grid);overflow:hidden}
+.track i{display:block;height:100%;border-radius:6px;background:var(--c1);min-width:3px}
+.progress .ends{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:6px}
+.road ol{list-style:none;margin:0;padding:0 0 0 24px;position:relative}
+.road ol::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--grid)}
+.road li{position:relative;padding:0 0 12px}
+.road .dot{position:absolute;left:-21px;top:5px;width:12px;height:12px;border-radius:50%;border:2px solid var(--axis);background:var(--panel)}
+.road .done .dot{border-color:transparent;background:var(--c1)}
+.road .wait .dot{border-style:dashed}
+.road .when{display:block;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.road .here{font-weight:600}
+.road .here .dot{width:16px;height:16px;left:-23px;top:3px;background:var(--c2);border:3px solid var(--panel);box-shadow:0 0 0 2px var(--c2)}
+details.notes{margin-top:8px}
+details.notes summary{cursor:pointer;font-weight:600}
+details.notes li{margin-bottom:6px;color:var(--muted);font-size:14px}
+footer{margin:40px 0 0;padding:26px 0 40px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+footer p{margin:0 0 6px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+.minebtn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;font-size:15px;padding:11px 20px;border-radius:999px;border:0;background:var(--c1);color:#fff;cursor:pointer;box-shadow:0 4px 14px color-mix(in srgb,var(--c1) 35%,transparent);margin-top:18px}
+.minebtn:hover{filter:brightness(1.08)}
+.nav a.mine{background:var(--c1);color:#fff;border-color:var(--c1)}
+dialog.calc{border:1px solid var(--line);border-radius:18px;padding:0;max-width:760px;width:calc(100% - 24px);background:var(--panel);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog.calc::backdrop{background:rgba(10,14,22,.45);backdrop-filter:blur(2px)}
+.calc .hd{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 6px}
+.calc .hd h2{font-size:26px}
+.calc .x{font:inherit;font-size:22px;line-height:1;border:0;background:none;color:var(--muted);cursor:pointer;padding:6px 10px;border-radius:8px}
+.calc .bd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;padding:8px 20px 20px}
+.calc label{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px}
+.calc select,.calc input{width:100%;font:inherit;font-size:16px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.calc .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+.calc .out{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.calc .res{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.calc .res:last-child{border-bottom:0}
+.calc .res span:first-child{font-size:13px;color:var(--muted)}
+.calc .res b{font-variant-numeric:tabular-nums;font-size:16px;text-align:right}
+.calc .res.key b{font-family:var(--serif);font-weight:400;font-size:30px}
+.calc .note{font-size:12px;color:var(--muted);margin:10px 0 0}
+.calc .srch{display:flex;gap:8px;margin:0}
+.calc .srch input{flex:1;min-width:0}
+.calc .srch button{font:inherit;font-size:15px;font-weight:600;padding:9px 16px;border-radius:10px;border:0;background:var(--c1);color:#fff;cursor:pointer;white-space:nowrap}
+.calc .hint{font-size:12px;color:var(--muted);margin:5px 0 0;min-height:15px}
+.calc .hint.none{color:#c0392b}
+.minebtn.alt{background:var(--panel);color:var(--fg);border:1px solid var(--line);box-shadow:none;margin-left:10px}
+.mk .bd{grid-template-columns:minmax(0,1fr)}
+.mk .src{font-size:12.5px;color:var(--muted);margin:2px 0 0;line-height:1.5}
+.mk .src b{color:var(--fg);font-weight:600}
+.mk .live{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok);margin-right:6px}
+.mk .live.snap{background:color-mix(in srgb,var(--c2) 15%,transparent);color:var(--c2)}
+.mk .seg{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.mk .seg button{font:inherit;font-size:13.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;min-height:36px}
+.mk .seg button[aria-pressed=true]{background:var(--fg);color:var(--panel);border-color:var(--fg)}
+.mk .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.mk .tile{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.mk .tile p{margin:0;font-size:12px;color:var(--muted)}
+.mk .tile b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(20px,3vw,26px);font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px}
+.mk h3{font-size:15px;margin:16px 0 6px}
+.mk .bars{display:grid;gap:7px}
+.mk .bar{display:grid;grid-template-columns:110px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:13px}
+.mk .bar .tr{background:var(--grid);border-radius:6px;height:22px;position:relative;overflow:hidden}
+.mk .bar .fl{position:absolute;inset:0 auto 0 0;background:var(--c1);border-radius:6px}
+.mk .bar.zy .fl{background:var(--c2)}
+.mk .bar .n{text-align:right;font-variant-numeric:tabular-nums}
+.mk .zynote{font-size:12.5px;margin:8px 0 0;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--c2) 10%,transparent)}
+.mk table{width:100%;border-collapse:collapse;font-size:13.5px}
+dialog.sp{max-width:980px}
+.calc .bd>div{min-width:0}
+.sp .scroll{overflow-x:auto;margin-top:8px;border:1px solid var(--line);border-radius:12px}
+.sp table{min-width:600px}
+.sp th button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+.sp th button[aria-sort]::after{content:" ↓"}
+.sp th button[aria-sort=ascending]::after{content:" ↑"}
+.sp td:first-child,.sp th:first-child{position:sticky;left:0;background:var(--panel)}
+.sp tr.zy td{background:color-mix(in srgb,var(--c2) 12%,var(--panel));font-weight:600}
+.sp .claim{font-size:13px;margin:12px 0 0;padding:10px 12px;border-radius:10px;border:1px dashed var(--c2)}
+.sp .claim b{font-size:15px}
+.sp sup{color:var(--c2);font-weight:700;line-height:0}
+.minebtn.alt+.minebtn.alt{margin-left:10px}
+.mk th,.mk td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mk th:first-child,.mk td:first-child{text-align:left}
+.mk th{font-weight:600;color:var(--muted);font-size:12.5px}
+@media (max-width:640px){.mk .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.mk .tile{padding:8px 9px}.mk .bar{grid-template-columns:86px minmax(0,1fr) 36px}.minebtn.alt{margin-left:0}}
+@media (max-width:640px){.calc .bd{grid-template-columns:1fr}}
+@media (max-width:520px){.hero{padding:24px 18px}.grid{grid-template-columns:1fr}.kpi .big{font-size:30px}}
+/* v9 */
+.age{font-variant-numeric:tabular-nums}.age.old{color:#b26a00;font-weight:600}
+.stalebar{margin:0 0 14px;padding:9px 12px;border-radius:10px;font-size:13.5px;border:1px solid color-mix(in srgb,#e0a000 45%,var(--line));background:color-mix(in srgb,#e0a000 12%,var(--panel))}
+.split{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--grid);margin:8px 0 10px}
+.split i{display:block;height:100%}
+.keyrows{display:grid;gap:4px;font-size:13.5px}.keyrows div{display:flex;justify-content:space-between;gap:10px}.keyrows span:last-child{font-variant-numeric:tabular-nums;color:var(--muted)}
+.keyrows .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.dl{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 0}.dl a{display:inline-block;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--bg);font-size:14px;text-decoration:none;font-weight:500}
+.mtab td,.mtab th{font-size:13.5px}
+@media (max-width:600px){
+ .sp table{min-width:0;width:100%}.sp thead{display:none}
+ .sp tbody{display:flex;flex-direction:column}
+ .sp tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;padding:10px 12px;border-bottom:1px solid var(--line)}
+ .sp tr.zy{order:-1;background:color-mix(in srgb,var(--c2) 12%,var(--panel))}
+ .sp td,.sp tr.zy td{border:0;padding:0;text-align:left;position:static;background:none}
+ .sp td:first-child{grid-column:1/-1;font-weight:600;font-size:15px}
+ .sp td[data-l]::before{content:attr(data-l);display:block;font-size:11.5px;font-weight:400;color:var(--muted)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><div class="brand"><span class="logo" aria-hidden="true"></span>Zycord Pulse</div><div>Independent statistics by <a href="https://brilliantnodes.com" rel="noopener">Brilliant Nodes</a></div></div>
+ <header class="hero" id="top">
+  <p class="eyebrow"><span class="live"><i></i>Block <b id="h-height">—</b></span><span>Read from a Zycord full node · updated <span id="h-upd">—</span> UTC <span class="age" id="h-age"></span></span></p>
+  <p class="stalebar" id="stale" hidden></p>
+  <h1>Zycord Pulse</h1>
+  <p class="lede">Over the last 7 days Zycord mainnet carried an average of <b id="l-tx">—</b> transactions a day, <span id="l-dir">—</span> on the week before. Since launch it has produced <b id="l-blocks">—</b> blocks without missing a single day, and every scheduled upgrade arrived on its announced block.</p>
+  <p class="cov" id="cov">—</p>
+  <button type="button" class="minebtn" id="open-mine">⛏ Mine Zycord</button> <button type="button" class="minebtn alt" id="open-mkt">📊 Market statistics</button> <button type="button" class="minebtn alt" id="open-spd">⚡ Speed comparison</button>
+  <div class="kpis">
+   <div class="kpi"><p class="lab">Transactions a day, 7-day average</p><p class="big" id="k-tx">—</p><p class="chg" id="k-tx-c">—</p><div class="spark" id="sp-tx"></div></div>
+   <div class="kpi"><p class="lab">Smart-contract calls a day, 7-day average</p><p class="big" id="k-calls">—</p><p class="chg" id="k-calls-c">—</p><div class="spark" id="sp-calls"></div></div>
+   <div class="kpi"><p class="lab">Transactions since launch</p><p class="big" id="k-cum">—</p><p class="chg">Every block read since block 0</p><div class="spark" id="sp-cum"></div></div>
+   <div class="kpi"><p class="lab">Network hashrate, last full day</p><p class="big"><span id="k-hash">—</span> <span style="font-size:18px">MH/s</span></p><p class="chg" id="k-hash-c">—</p><div class="spark" id="sp-hash"></div></div>
+  </div>
+ </header>
+</div>
+
+<nav class="nav" aria-label="Sections"><div class="wrap">
+ <a href="#usage">Usage</a><a href="#network">Network &amp; reliability</a><a href="#development">Development</a><a href="#delivery">Delivery record</a><a href="#mining">Mining &amp; staking</a><a href="#methods">Methods</a><a href="#mine" class="mine" id="nav-mine">Mine Zycord</a><a href="#market" class="mine" id="nav-market">Market statistics</a><a href="#speed" class="mine" id="nav-speed">Speed comparison</a>
+</div></nav>
+
+<main class="wrap">
+
+<section class="sec" id="usage">
+ <div class="sechead"><div><h2>Usage</h2><p class="secsub">What is happening on the chain each day. Faded bars are the current, unfinished UTC day. <a href="data/pulse_daily.csv">Download the daily figures (CSV)</a>.</p></div>
+  <div class="seg" role="group" aria-label="Date range"><button type="button" data-range="14">14 days</button><button type="button" data-range="30">30 days</button><button type="button" data-range="0" aria-pressed="true">All</button></div></div>
+ <div class="tiles">
+  <div class="card"><p class="lab">Transactions since launch</p><p class="big" id="t-cum">—</p><p class="chg">The node's own counter: <span id="t-node">—</span></p></div>
+  <div class="card"><p class="lab">ZCD moved since launch</p><p class="big" id="t-zcd">—</p><p class="chg">Native ZCD sent in transfers</p></div>
+  <div class="card"><p class="lab">Smart contracts deployed</p><p class="big" id="t-dep">—</p><p class="chg"><span id="t-calls">—</span> contract calls since 4 Nov</p></div>
+  <div class="card"><p class="lab">Different signing keys since launch</p><p class="big" id="t-keys">—</p><p class="chg">Wallets use a fresh key per payment</p></div>
+ </div>
+ <div class="grid">
+  <div class="card wide"><h3>Transactions per day</h3><p class="legend"><span><i class="sw" style="background:var(--c1)"></i>Transactions</span><span><i class="sw" style="background:var(--c2)"></i>7-day average</span></p><div class="chart" id="ch-tx"></div></div>
+  <div class="card"><h3>Transactions since launch</h3><p class="sub">Running total, all transaction types.</p><div class="chart" id="ch-cum"></div></div>
+  <div class="card"><h3>Smart-contract use per day</h3><p class="legend"><span><i class="sw" style="background:var(--c1)"></i>Contract calls</span><span><i class="sw" style="background:var(--c2)"></i>Different addresses calling</span></p><div class="chart" id="ch-contracts"></div></div>
+  <div class="card"><h3>Signing keys used per day</h3><p class="legend"><span><i class="sw" style="background:var(--c1)"></i>Different keys that signed</span><span><i class="sw" style="background:var(--c2)"></i>7-day average</span></p><div class="chart" id="ch-keys"></div></div>
+  <div class="card"><h3>First-time keys per day</h3><p class="sub">Keys seen for the first time. Wallets use a fresh key for each payment and change output, so this counts new addresses, not new people.</p><div class="chart" id="ch-new"></div></div>
+  <div class="card"><h3>ZCD sent per day</h3><p class="sub">Native ZCD moved in transfers.</p><div class="chart" id="ch-zcd"></div></div>
+ </div>
+</section>
+
+<section class="sec" id="network">
+ <div class="sechead"><div><h2>Network &amp; reliability</h2><p class="secsub">How steadily the chain runs, how much work protects it, how spread out mining is, and how much room it has to grow.</p></div></div>
+ <div class="tiles">
+  <div class="card"><p class="lab">Days running without a stop</p><p class="big" id="r-days">—</p><p class="chg">Blocks every day since launch</p></div>
+  <div class="card"><p class="lab">Average block time since launch</p><p class="big"><span id="r-avg">—</span> s</p><p class="chg">Target: 30 seconds</p></div>
+  <div class="card"><p class="lab">Longest wait between two blocks</p><p class="big" id="r-gap">—</p><p class="chg"><span id="r-gaps5">—</span> waits over 5 minutes in <span id="r-blocks2">—</span> blocks</p></div>
+  <div class="card"><p class="lab">Deepest chain reorganisation</p><p class="big"><span id="r-reorg">—</span> blocks</p><p class="chg"><span id="r-reorgn">—</span> short reorganisations since launch</p></div>
+  <div class="card"><p class="lab">Different addresses that have won blocks</p><p class="big" id="r-payout">—</p><p class="chg">Since launch; a pool counts once</p></div>
+  <div class="card"><p class="lab">Days on target</p><p class="big" id="r-ontgt">—</p><p class="chg">Full days with an average block time within 5% of 30 s</p></div>
+ </div>
+ <div class="grid">
+  <div class="card"><h3>Network hashrate, MH/s</h3><p class="sub">Work in each day's blocks divided by the day's seconds.</p><div class="chart" id="ch-hash"></div></div>
+  <div class="card"><h3>How spread out mining is</h3><p class="legend"><span><i class="sw" style="background:var(--c1)"></i>Largest payout address, % of blocks</span><span><i class="sw" style="background:var(--c2)"></i>Top 3 payout addresses</span></p><div class="chart" id="ch-spread"></div></div>
+  <div class="card"><h3>Different addresses winning blocks each day</h3><p class="sub">A count only: a pool pays to one address, so it counts once. No address is named on this page.</p><div class="chart" id="ch-payout"></div></div>
+  <div class="card"><h3>Chain reorganisations by depth</h3><p class="sub">A reorganisation replaces the newest block or blocks when two miners find a block at almost the same time. Short ones are normal in proof of work.</p>
+   <div class="tw"><table class="mtab"><thead><tr><th>Depth</th><th>Recent events</th></tr></thead><tbody id="reorg-rows"></tbody></table></div>
+   <p class="sub" id="reorg-note" style="margin:10px 0 0">—</p></div>
+  <div class="card"><h3>Average block time, seconds</h3><p class="sub">Dashed line: the 30-second target.</p><div class="chart" id="ch-bt"></div></div>
+  <div class="card"><h3>Longest wait between blocks each day, minutes</h3><p class="sub">Proof-of-work blocks arrive at random; the difficulty rule keeps the average on target.</p><div class="chart" id="ch-gap"></div></div>
+  <div class="card"><h3>Room to grow</h3><p class="sub">The busiest block so far against what a single block may carry.</p>
+   <div class="bar"><div class="lbl"><span>Transactions in one block</span><span id="cap-c">—</span></div><div class="track"><i id="cap-cb"></i></div></div>
+   <div class="bar"><div class="lbl"><span>Size of one block</span><span id="cap-b">—</span></div><div class="track"><i id="cap-bb"></i></div></div>
+   <p class="sub" style="margin:4px 0 0">Today's typical block is <b id="cap-avg">—</b>. The chain can carry thousands of times today's traffic before blocks fill.</p>
+  </div>
+  <div class="card"><h3>Public seed nodes</h3><p class="sub">Four seed servers are built into the software (Romania, Netherlands, Finland, South Korea); the Zycord Lab reports on three.</p><div class="tw"><table><thead><tr><th>Seed</th><th>Status</th><th>Peers</th><th>Inbound</th></tr></thead><tbody id="seeds"></tbody></table></div></div>
+ </div>
+</section>
+
+<section class="sec" id="development">
+ <div class="sechead"><div><h2>Development</h2><p class="secsub">Measured from the public source repository<span id="dv-asof"></span>. Zycord is written from scratch in Go: not a fork of another chain.</p></div></div>
+ <div class="tiles">
+  <div class="card"><p class="lab">Commits</p><p class="big" id="d-commits">—</p><p class="chg">Since <span id="d-first">—</span>; last <span id="d-last">—</span></p></div>
+  <div class="card"><p class="lab">Releases</p><p class="big" id="d-rel">—</p><p class="chg">Latest <span id="d-latest">—</span></p></div>
+  <div class="card"><p class="lab">Lines of Go code</p><p class="big" id="d-lines">—</p><p class="chg"><span id="d-testshare">—</span> of it is tests</p></div>
+  <div class="card"><p class="lab">Automated tests</p><p class="big" id="d-tests">—</p><p class="chg"><span id="d-fuzz">—</span> fuzz tests, <span id="d-vec">—</span> reference test files</p></div>
+  <div class="card"><p class="lab">Protocol rules specified</p><p class="big" id="d-rules">—</p><p class="chg">Numbered block and state rules in the spec</p></div>
+  <div class="card"><p class="lab">People who have committed code</p><p class="big" id="d-people">—</p><p class="chg"><span id="d-outside">—</span> commits from contributors besides the lead</p></div>
+ </div>
+ <div class="grid">
+  <div class="card wide"><h3>Commits per week</h3><p class="legend"><span><i class="sw" style="background:var(--c1)"></i>Lead developer</span><span><i class="sw" style="background:var(--c2)"></i>Other contributors</span></p><div class="chart" id="ch-commits"></div></div>
+  <div class="card"><h3>Release history</h3><p class="sub">Tagged releases of the node software.</p><div class="tw"><table><thead><tr><th>Release</th><th>Date</th></tr></thead><tbody id="releases"></tbody></table></div></div>
+  <div class="card"><h3>Engineering practices</h3><p class="sub">Read from the repository and its documentation.</p>
+   <div class="badges" id="badges"></div>
+   <p class="sub" style="margin-top:14px">Consensus code may import only the Go standard library and a few named cryptography packages, and is checked against a second, independent implementation of the rules before release.</p>
+  </div>
+ </div>
+</section>
+
+<section class="sec" id="delivery">
+ <div class="sechead"><div><h2>Delivery record</h2><p class="secsub">Upgrades on Zycord are set to a block height in advance. This compares the time each one was scheduled for with the time its block was actually mined.</p></div></div>
+ <div class="card"><div class="tw"><table><thead><tr><th>Milestone</th><th>Block</th><th>Scheduled</th><th>Arrived</th><th>Result</th></tr></thead><tbody id="delivery-rows"></tbody></table></div><p class="sub" style="margin:12px 0 0">Launch is timed by the first mined block. A first mainnet launch on 1 October was cancelled by the developer after three addresses mined most of the early blocks; the chain relaunched on 7 October, the date shown here.</p></div>
+</section>
+
+<section class="sec" id="mining">
+ <div class="sechead"><div><h2>Mining &amp; road to staking</h2><p class="secsub">Block reward, epochs and milestones come from Zycord's own code. Staking (era 2) is written into the code, but a later release still has to switch it on.</p></div></div>
+ <div class="tiles">
+  <div class="card"><p class="lab">ZCD per block now</p><p class="big" id="m-rew">—</p><p class="chg"><span id="m-miner">—</span> to the miner (94%)</p></div>
+  <div class="card"><p class="lab">Current epoch</p><p class="big" id="m-epoch">—</p><p class="chg">Block <span id="m-inep">—</span> of 2,880 (one epoch is a day)</p></div>
+  <div class="card"><p class="lab">New ZCD per day</p><p class="big" id="m-day">—</p><p class="chg">Shrinks a little every day (about 0.1%), so it halves roughly every 2 years</p></div>
+  <div class="card"><p class="lab">ZCD issued so far</p><p class="big" id="m-sup">—</p><p class="chg">No premine; about 62.7 million in the long run</p></div>
+ </div>
+ <div class="card progress" style="margin-bottom:14px"><h3>Countdown to bonding</h3><p class="sub"><b id="m-days">—</b> days and <span id="m-blocks">—</span> blocks until epoch 182 (7 Apr 2027), when staking can open once a release switches it on.</p>
+  <div class="track" style="height:12px"><i id="m-bar"></i></div><div class="ends"><span>Launch, 7 Oct 2026</span><span><span id="m-pct">—</span>% of the way</span><span>Bonding, 7 Apr 2027</span></div></div>
+ <div class="grid">
+  <div class="card"><h3>ZCD per block, past and future</h3><p class="sub">Full reward of one 30-second block, to 2029. Dashed line: now. Shaded: the move from mining to staking; after it, the same daily amount is paid per 5-second slot.</p><div class="chart" id="ch-reward"></div></div>
+  <div class="card"><h3>Issued supply</h3><p class="sub">ZCD created so far against the long-run total of about 62.7 million, and how it was split.</p>
+   <div class="bar"><div class="lbl"><span>Issued so far</span><span id="s-pct">—</span></div><div class="track"><i id="s-bar"></i></div></div>
+   <div class="split" id="s-split" aria-hidden="true"></div>
+   <div class="keyrows" id="s-rows"></div>
+   <p class="sub" id="s-bond" style="margin:10px 0 0">—</p>
+   <h3 style="margin-top:16px">ZCD issued over time</h3><p class="sub">From Zycord's own reward schedule, to 2029. Dashed line: now.</p><div class="chart" id="ch-supply"></div></div>
+  <div class="card road"><h3>Road to staking</h3><p class="sub">Where the chain stands. Dashed dots wait on the release that turns staking on.</p><div id="road"></div></div>
+ </div>
+</section>
+
+<section class="sec" id="methods">
+ <div class="sechead"><div><h2>Methods &amp; sources</h2><p class="secsub">Every figure on this page can be reproduced from public data.</p></div></div>
+ <div class="card">
+  <ul id="sources" style="margin:0 0 10px;padding-left:18px"></ul>
+  <h3 style="margin-top:6px">Where each part of the page comes from</h3>
+  <div class="tw"><table class="mtab"><thead><tr><th>Part of the page</th><th>Source</th><th>How it is updated</th></tr></thead><tbody>
+   <tr><td>Usage, network, delivery, issued supply</td><td>Every block, read from our own Zycord full node</td><td>Rebuilt from the chain every hour; time shown at the top</td></tr>
+   <tr><td>Seed nodes, reorganisations</td><td>Zycord Lab network file</td><td>Read every hour</td></tr>
+   <tr><td>Reward schedule, road to staking</td><td>Zycord's own parameter code</td><td>Changes only with a new release</td></tr>
+   <tr><td>Development</td><td>Public repository, dev branch</td><td>Counted by hand; date shown in the section</td></tr>
+   <tr><td>Market statistics</td><td>CoinGecko</td><td>Live in your browser (30-minute cache); saved snapshot, refreshed every 6 hours, if CoinGecko cannot be reached</td></tr>
+   <tr><td>Speed comparison</td><td>Chainspect; Zycord row from our node</td><td>Snapshot, date shown in the panel</td></tr>
+   <tr><td>Mine Zycord calculator</td><td>Public CPU benchmarks; network figure from our node</td><td>CPU figures are approximate</td></tr>
+  </tbody></table></div>
+  <details class="notes" open><summary>How each number is measured</summary><ul>
+   <li>A transaction is one certificate in a block: a transfer, a contract deployment or call, an intent fill, or a staking or admin action.</li>
+   <li>Signing keys are counted, not people: Zycord wallets derive a fresh key for every payment received and every change output.</li>
+   <li>7-day changes compare the average of the last 7 full UTC days with the 7 full days before.</li>
+   <li>A payout address is the address a block reward goes to. A pool pays to one address, so a pool counts once. No address is named on this page.</li>
+   <li>Hashrate is computed from the difficulty target in each block header, as the node does.</li>
+   <li>Days are UTC. The newest day is a part day until midnight UTC.</li>
+   <li>Development figures count the public dev branch; lines include tests. A contributor is a distinct commit author.</li>
+   <li>Fees burned are not shown: past fee levels are not kept by the node, so they cannot be measured exactly from block history.</li>
+   <li>Issued supply follows Zycord's reward schedule up to the current block. The split uses the rule in the code: 94% to the miner, 3% founder share, 3% treasury.</li>
+   <li>Reorganisation depths count the recent events the Zycord Lab file keeps; the all-time count and the deepest come from the same file.</li>
+   <li>Days on target: full UTC days whose average block time is between 28.5 and 31.5 seconds.</li>
+   <li>Busiest 100 blocks (speed comparison): every run of 100 consecutive blocks since launch, transactions divided by the time the run took.</li>
+   <li>The update time at the top turns amber when the figures are more than a day old.</li>
+  </ul></details>
+  <h3 style="margin-top:14px">Download the data</h3>
+  <p class="sub">Open files, free to reuse. The same figures this page draws.</p>
+  <div class="dl"><a href="data/pulse_daily.csv">Daily figures (CSV)</a><a href="data/pulse_schedule.csv">Reward schedule (CSV)</a><a href="data/pulse.json">Everything (JSON)</a></div>
+ </div>
+</section>
+
+</main>
+<dialog class="calc" id="mine" aria-labelledby="mine-t">
+ <div class="hd"><h2 id="mine-t">Mine Zycord</h2><button type="button" class="x" id="close-mine" aria-label="Close">×</button></div>
+ <p class="sub" style="padding:0 20px;margin:0">What it costs to mine one ZCD on your own hardware today. Zycord uses RandomX v2, so any modern CPU can mine it.</p>
+ <div class="bd">
+  <div>
+   <label for="mc-q">Search for your CPU</label>
+   <form class="srch" id="mc-form" role="search" autocomplete="off"><input id="mc-q" type="search" placeholder="e.g. 7950X, i7-13700K, EPYC, M2" enterkeyhint="search"><button type="submit" id="mc-go">Search</button></form>
+   <p class="hint" id="mc-cnt"></p>
+   <label for="mc-cpu">Your CPU</label><select id="mc-cpu"></select>
+   <div class="row2"><div><label for="mc-hash">Hashrate per machine, kH/s</label><input id="mc-hash" type="number" min="0" step="0.1" inputmode="decimal"></div>
+   <div><label for="mc-watt">Power per machine, watts</label><input id="mc-watt" type="number" min="0" step="1" inputmode="numeric"></div></div>
+   <div class="row2"><div><label for="mc-n">Number of machines</label><input id="mc-n" type="number" min="1" step="1" value="1" inputmode="numeric"></div>
+   <div><label for="mc-kwh">Electricity, USD per kWh</label><input id="mc-kwh" type="number" min="0" step="0.01" value="0.10" inputmode="decimal"></div></div>
+   <label for="mc-net">Network hashrate, MH/s</label><input id="mc-net" type="number" min="0" step="0.01" inputmode="decimal">
+   <p class="note">CPU figures are approximate RandomX results, based on public benchmarks and each chip's cache size, rounded. Your machine may differ, so edit them freely. The network figure is the last full day measured from the chain.</p>
+  </div>
+  <div class="out" aria-live="polite">
+   <div class="res key"><span>Implied price per ZCD<br>(your break-even cost)</span><b id="mc-price">—</b></div>
+   <div class="res key"><span>Implied ZCD FDV<br>(price × 62.7M long-run supply)</span><b id="mc-fdv">—</b></div>
+   <div class="res"><span>ZCD you mine per day</span><b id="mc-zcd">—</b></div>
+   <div class="res"><span>Electricity cost per day</span><b id="mc-cost">—</b></div>
+   <div class="res"><span>Your share of the network</span><b id="mc-share">—</b></div>
+   <div class="res"><span>Implied value of ZCD issued so far</span><b id="mc-mcap">—</b></div>
+   <div class="res"><span>Miner reward per block now</span><b id="mc-rew">—</b></div>
+   <p class="note">Electricity only: hardware, cooling and pool fees are not included. The reward falls by 1 part in 1,054 every day and the network hashrate changes, so this is today's figure. It is a cost of production, not a market price, and not investment advice.</p>
+  </div>
+ </div>
+</dialog>
+<footer><div class="wrap">
+ <p><b>Zycord Pulse</b> is an independent dashboard built and run by <a href="https://brilliantnodes.com" rel="noopener">Brilliant Nodes</a>. It is not affiliated with or endorsed by the Zycord project.</p>
+ <p>Brilliant Nodes mines and holds ZCD. Nothing here is investment advice.</p>
+ <p>Data built <span id="f-built">—</span> UTC, updated every hour. Charts drawn with d3 (ISC licence).</p>
+ <p>Zycord Pulse <b>v1.0</b> · Source code, data builders and open data: <a href="https://github.com/brilliantnodes/zycord-pulse" rel="noopener">github.com/brilliantnodes/zycord-pulse</a> (MIT licence).</p>
+</div></footer>
+
+<script src="vendor/d3.v7.min.js"></script>
+<dialog class="calc mk" id="market" aria-labelledby="mkt-t">
+ <div class="hd"><h2 id="mkt-t">Market statistics: Layer 1 coins</h2><button type="button" class="x" id="close-mkt" aria-label="Close">×</button></div>
+ <div class="bd"><div>
+  <p class="src" id="mk-src">—</p>
+  <div class="seg" role="group" aria-label="Which coins" id="mk-seg"></div>
+  <div class="tiles">
+   <div class="tile"><p>Coins with an FDV</p><b id="mk-n">—</b></div>
+   <div class="tile"><p>Median FDV (typical coin)</p><b id="mk-med">—</b></div>
+   <div class="tile"><p>Average FDV</p><b id="mk-avg">—</b></div>
+  </div>
+  <h3>How many coins sit in each FDV band</h3>
+  <div class="bars" id="mk-bars"></div>
+  <p class="zynote" id="mk-zy">—</p>
+  <h3>By market-cap rank (all Layer 1 coins)</h3>
+  <table><thead><tr><th>Market-cap rank</th><th>Coins</th><th>Median FDV</th><th>Average FDV</th></tr></thead><tbody id="mk-rank"></tbody></table>
+  <p class="note">FDV (fully diluted valuation) is price × maximum or total supply, as CoinGecko reports it. Coins without an FDV are left out. A few very large coins pull the average far above the typical coin, so the median is the better guide. Proof-of-work membership follows CoinGecko's proof-of-work category. Not investment advice. Data provided by <a href="https://www.coingecko.com/en/categories/layer-1" target="_blank" rel="noopener">CoinGecko</a>.</p>
+ </div></div>
+</dialog>
+<dialog class="calc mk sp" id="speed" aria-labelledby="spd-t">
+ <div class="hd"><h2 id="spd-t">Speed comparison: Layer 1 blockchains</h2><button type="button" class="x" id="close-spd" aria-label="Close">×</button></div>
+ <div class="bd"><div>
+  <p class="src" id="sp-src">—</p>
+  <div class="seg" role="group" aria-label="Sort by" id="sp-seg"></div>
+  <div class="scroll"><table><thead><tr id="sp-head"></tr></thead><tbody id="sp-rows"></tbody></table></div>
+  <p class="claim" id="sp-claim"><b>*</b> Zycord’s theoretical maximum of 294,000 transactions per second is claimed by the Zycord developer and has not been independently verified. It is the developer’s figure for how many transactions one CPU core can check per second. Under the current consensus rule, the network carries at most 133 transactions per second (4,000 per 30-second block).</p>
+  <p class="note" id="sp-zymax" hidden></p>
+  <p class="note">Transactions per second, last hour: what each chain actually carried. Highest: the busiest stretch of 100 blocks Chainspect has recorded. Theoretical: the chain’s design limit as Chainspect states it. Finality: time until a transaction cannot be reversed; “Instant” means final when the block is made. Chains count transactions differently, so compare with care. Zycord’s row is measured by Zycord Pulse from the chain itself (real use: the last 7 full days; highest: the busiest 100 blocks since launch; block time: the average since launch), except the theoretical maximum (see *). Proof-of-work chains such as Bitcoin and Zycord have no fixed finality; Bitcoin’s 1 hour is the usual six-block convention. Data from <a href="https://chainspect.app/dashboard" target="_blank" rel="noopener">Chainspect</a>.</p>
+ </div></div>
+</dialog>
+<script src="data/pulse.js"></script>
+<script src="data/speed.js"></script>
+<script src="data/market.js"></script>
+<script>
+(function () {
+  const D = window.ZP_DATA;
+  if (!D || !window.d3) { document.getElementById('cov').textContent = 'The data file could not be loaded.'; return; }
+  const fmt = d3.format(','), f1 = d3.format('.1f'), f2 = d3.format('.2f');
+  const utc = (s) => new Date(s + 'T00:00:00Z');
+  const dayLbl = (s) => d3.utcFormat('%-d %b')(utc(s));
+  const G = 1791331200, E = 2880;
+  const hDate = (h) => new Date((G + h * 30) * 1000);
+  const $ = (id) => document.getElementById(id);
+  const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+  let range = 0;
+
+  // ---------- derived series
+  const rows = [...D.daily].sort((a, b) => (a.day < b.day ? -1 : 1));
+  rows.forEach((r, i) => {
+    const w = rows.slice(Math.max(0, i - 6), i + 1);
+    r.txs_7d = d3.mean(w, (x) => x.txs); r.keys_7d = d3.mean(w, (x) => x.active_senders); r.calls_7d = d3.mean(w, (x) => x.contract_calls);
+    r.hash = r.hashrate_khs / 1000; r.gap_min = r.max_gap_s / 60;
+  });
+  const full = rows.filter((r) => r.full_day);
+  const a = full.slice(-7), b = full.slice(-14, -7);
+  const avg = (w, f) => d3.mean(w, (x) => +x[f] || 0);
+  const chg = (f) => (b.length === 7 && avg(b, f) ? (100 * (avg(a, f) - avg(b, f))) / avg(b, f) : null);
+  const last = full[full.length - 1], prev7 = full[full.length - 8];
+
+  // ---------- hero
+  const N = D.now;
+  set('h-height', fmt(N.height));
+  set('h-upd', d3.utcFormat('%-d %b %Y, %H:%M')(new Date(N.read_utc)));
+  (function freshness() {
+    const hrs = (Date.now() - new Date(N.read_utc).getTime()) / 3.6e6;
+    if (!isFinite(hrs) || hrs < 0) return;
+    const txt = hrs < 1 ? 'less than an hour ago' : hrs < 48 ? Math.round(hrs) + (Math.round(hrs) === 1 ? ' hour ago' : ' hours ago') : Math.round(hrs / 24) + ' days ago';
+    const el = $('h-age'); el.textContent = '(' + txt + ')';
+    if (hrs > 24) { el.classList.add('old'); const s = $('stale'); s.textContent = 'These figures were last updated ' + txt + '. They normally update every hour; the next update will bring them up to date.'; s.hidden = false; }
+  })();
+  const txc = chg('txs');
+  set('l-tx', fmt(Math.round(avg(a, 'txs'))));
+  set('l-dir', txc == null ? 'with no earlier week to compare' : (txc > 1 ? 'up ' : txc < -1 ? 'down ' : 'about level, ') + f1(Math.abs(txc)) + '%');
+  set('l-blocks', fmt(D.coverage.blocks_scanned));
+  set('cov', D.coverage.history_complete ? 'Every block since launch has been read: blocks 0 to ' + fmt(D.coverage.scanned_to_height) + ', ' + fmt(D.coverage.certs_scanned) + ' transactions.' : 'History still loading.');
+  const chgTxt = (id, v, lbl) => { const e = $(id); if (v == null) { e.textContent = 'No comparison yet'; return; } e.textContent = (v > 0 ? '▲ +' : v < 0 ? '▼ ' : '') + f1(v) + '% ' + lbl; e.className = 'chg ' + (v > 0 ? 'good' : v < 0 ? 'bad' : ''); };
+  set('k-tx', fmt(Math.round(avg(a, 'txs')))); chgTxt('k-tx-c', txc, 'vs the week before');
+  set('k-calls', fmt(Math.round(avg(a, 'contract_calls')))); chgTxt('k-calls-c', chg('contract_calls'), 'vs the week before');
+  set('k-cum', fmt(rows[rows.length - 1].cum_txs || D.coverage.certs_scanned));
+  set('k-hash', f2(last.hash)); chgTxt('k-hash-c', prev7 ? (100 * (last.hashrate_khs - prev7.hashrate_khs)) / prev7.hashrate_khs : null, 'vs 7 days earlier');
+
+  // ---------- usage tiles
+  set('t-cum', fmt(rows[rows.length - 1].cum_txs)); set('t-node', fmt(N.certs_applied));
+  set('t-zcd', d3.format(',.0f')(rows[rows.length - 1].cum_zcd_sent));
+  set('t-dep', fmt(d3.sum(rows, (r) => r.contracts_deployed))); set('t-calls', fmt(d3.sum(rows, (r) => r.contract_calls)));
+  set('t-keys', fmt(D.coverage.total_senders_seen));
+
+  // ---------- reliability tiles
+  const R = D.reliability;
+  set('r-days', fmt(R.days_running)); set('r-avg', f2(R.avg_block_s_all));
+  set('r-gap', Math.floor(R.longest_gap_s / 60) + ' min ' + (R.longest_gap_s % 60) + ' s');
+  set('r-gaps5', fmt(R.gaps_over_5_min)); set('r-blocks2', fmt(D.coverage.blocks_scanned));
+  set('r-reorg', fmt(N.deepest_reorg)); set('r-reorgn', fmt(N.reorg_events));
+  set('r-payout', fmt(D.coverage.total_payout_addresses_seen));
+  (function steadiness() {
+    const on = full.filter((r) => r.avg_block_s >= 28.5 && r.avg_block_s <= 31.5).length;
+    set('r-ontgt', on + ' of ' + full.length);
+    const RG = D.reorgs;
+    if (RG) {
+      const tb = $('reorg-rows'); const dep = RG.recent_by_depth || {};
+      const maxD = Math.max(1, ...Object.keys(dep).map(Number));
+      for (let k = 1; k <= maxD; k++) { const tr = document.createElement('tr'); [k === 1 ? '1 block' : k + ' blocks', fmt(dep[String(k)] || 0)].forEach((v) => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); }); tb.appendChild(tr); }
+      set('reorg-note', 'Recent events: the last ' + fmt(RG.recent_count) + ' kept by the Zycord Lab, blocks ' + fmt(RG.recent_from_height) + ' to ' + fmt(RG.recent_to_height) + '. Since launch: ' + fmt(RG.events) + ' reorganisations, the deepest ' + fmt(RG.deepest) + ' blocks.');
+    }
+  })();
+  const pc = (100 * N.largest_block_certs) / N.max_certs_per_block, pb = (100 * N.largest_block_bytes) / N.block_byte_limit;
+  set('cap-c', fmt(N.largest_block_certs) + ' of ' + fmt(N.max_certs_per_block) + ' (' + f2(pc) + '%)');
+  set('cap-b', d3.format(',.0f')(N.largest_block_bytes / 1000) + ' KB of ' + fmt(N.block_byte_limit / 1e6) + ' MB (' + f1(pb) + '%)');
+  $('cap-cb').style.width = Math.max(0.3, pc) + '%'; $('cap-bb').style.width = Math.max(0.3, pb) + '%';
+  set('cap-avg', fmt(N.avg_bytes_block_last) + ' bytes');
+  const sb = $('seeds');
+  D.seeds.forEach((s) => { const tr = document.createElement('tr'); [s.name, s.up ? 'Online' : 'Down', fmt(s.peers), fmt(s.inbound)].forEach((v, i) => { const td = document.createElement('td'); if (i === 1) { const p = document.createElement('span'); p.className = 'pill' + (s.up ? ' ok' : ''); p.textContent = v; td.appendChild(p); } else td.textContent = v; tr.appendChild(td); }); sb.appendChild(tr); });
+
+  // ---------- development
+  const V = D.dev;
+  set('d-commits', fmt(V.commits)); set('d-first', d3.utcFormat('%-d %b %Y')(utc(V.first_commit))); set('d-last', d3.utcFormat('%-d %b')(utc(V.last_commit)));
+  set('d-rel', fmt(V.releases.length)); set('d-latest', V.releases[V.releases.length - 1].tag + ', ' + d3.utcFormat('%-d %b')(utc(V.releases[V.releases.length - 1].date)));
+  set('d-lines', d3.format('.3s')(V.go_lines).replace('k', 'k')); set('d-testshare', Math.round((100 * V.test_lines) / V.go_lines) + '%');
+  set('d-tests', fmt(V.test_functions)); set('d-fuzz', fmt(V.fuzz_targets)); set('d-vec', fmt(V.test_vector_files));
+  set('d-rules', fmt(V.protocol_rules)); set('d-people', fmt(V.people)); set('d-outside', fmt(V.outside_commits));
+  const rb = $('releases');
+  [...V.releases].reverse().forEach((r) => { const tr = document.createElement('tr'); [r.tag, d3.utcFormat('%-d %b %Y')(utc(r.date))].forEach((v) => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); }); rb.appendChild(tr); });
+  const bd = $('badges');
+  ['Written from scratch in Go', 'MIT open-source licence', 'Reproducible builds', 'Signed releases', V.go_packages + ' Go packages', 'Golden test vectors', 'Fuzz testing', 'Second implementation for conformance', 'Formal protocol specification', 'Published whitepaper'].forEach((t) => { const s = document.createElement('span'); s.className = 'badge'; const i = document.createElement('i'); s.appendChild(i); s.appendChild(document.createTextNode(t)); bd.appendChild(s); });
+
+  // ---------- delivery
+  const db = $('delivery-rows');
+  const tf = d3.utcFormat('%-d %b %Y, %H:%M');
+  D.delivery.forEach((m) => {
+    const tr = document.createElement('tr');
+    const res = m.diff_min === 0 ? 'On time' : Math.abs(m.diff_min) + ' min ' + (m.diff_min < 0 ? 'early' : 'late');
+    [m.name, fmt(m.height), tf(new Date(m.scheduled_utc * 1000)) + ' UTC', tf(new Date(m.actual_utc * 1000)) + ' UTC', res].forEach((v, i) => { const td = document.createElement('td'); if (i === 4) { const p = document.createElement('span'); p.className = 'pill ok'; p.textContent = '✓ ' + v; td.appendChild(p); } else td.textContent = v; tr.appendChild(td); });
+    db.appendChild(tr);
+  });
+
+  // ---------- mining
+  const h = N.height, ep = Math.floor(h / E), into = h - ep * E;
+  const srow = D.schedule.find((r) => +r.epoch === ep);
+  if (srow) {
+    const rew = +srow.reward_per_block, sup = +srow.supply + rew * into, toB = Math.max(0, 182 * E - h);
+    set('m-rew', f2(rew)); set('m-miner', f2(rew * 0.94)); set('m-epoch', fmt(ep)); set('m-inep', fmt(into + 1));
+    set('m-day', fmt(Math.round(rew * E))); set('m-sup', fmt(Math.round(sup)));
+    set('m-days', fmt(Math.round((toB * 30) / 86400))); set('m-blocks', fmt(toB));
+    const pct = (100 * Math.min(h, 182 * E)) / (182 * E); set('m-pct', f1(pct)); $('m-bar').style.width = pct + '%';
+    // issued supply (v9)
+    const CAP = 62.7e6, sp = (100 * sup) / CAP;
+    set('s-pct', fmt(Math.round(sup)) + ' ZCD (' + f2(sp) + '%)'); $('s-bar').style.width = Math.max(0.5, sp) + '%';
+    const parts = [['To miners (94%)', 0.94, 'var(--c1)'], ['Founder share (3%)', 0.03, 'var(--c2)'], ['Treasury (3%)', 0.03, 'var(--c3)']];
+    $('s-split').innerHTML = parts.map((p) => '<i style="width:' + p[1] * 100 + '%;background:' + p[2] + '"></i>').join('');
+    $('s-rows').innerHTML = parts.map((p) => '<div><span><i class="sw" style="background:' + p[2] + '"></i>' + p[0] + '</span><span>about ' + fmt(Math.round(sup * p[1])) + ' ZCD</span></div>').join('');
+    const bRow = D.schedule.filter((r) => +r.epoch <= 182).reduce((m, r) => (+r.epoch > +m.epoch ? r : m), D.schedule[0]);
+    if (bRow) {
+      const bSup = +bRow.supply + +bRow.reward_per_block * E * (182 - +bRow.epoch);
+      set('s-bond', 'By bonding (epoch 182, ' + d3.utcFormat('%-d %b %Y')(hDate(182 * E)) + '), about ' + d3.format(',.2r')(bSup) + ' ZCD will have been issued, by the same schedule.');
+    }
+  }
+  (function road() {
+    const el = $('road'); const ol = document.createElement('ol');
+    const ms = D.milestones.filter((r) => r.id !== 'founderend').map((r) => ({ ...r, height: +r.height })).sort((x, y) => x.height - y.height);
+    let placed = false;
+    const here = () => { const li = document.createElement('li'); li.className = 'here'; const d = document.createElement('span'); d.className = 'dot'; li.appendChild(d); li.appendChild(document.createTextNode('We are here: block ' + fmt(h) + ', epoch ' + fmt(ep))); const w = document.createElement('span'); w.className = 'when'; w.textContent = d3.utcFormat('%-d %b %Y')(hDate(h)); li.appendChild(w); ol.appendChild(li); placed = true; };
+    ms.forEach((r) => {
+      if (!placed && r.height > h) here();
+      const done = r.height <= h; const li = document.createElement('li'); li.className = done ? 'done' : (r.status === 'needs release' ? 'wait' : 'next');
+      const d = document.createElement('span'); d.className = 'dot'; li.appendChild(d); li.appendChild(document.createTextNode(r.name));
+      const w = document.createElement('span'); w.className = 'when'; const days = Math.round(((r.height - h) * 30) / 86400);
+      w.textContent = d3.utcFormat('%-d %b %Y')(utc(r.date)) + ' · block ' + fmt(r.height) + ' · ' + (done ? 'done' : 'in ' + fmt(days) + ' days' + (r.status === 'needs release' ? ', needs a release' : ''));
+      li.appendChild(w); ol.appendChild(li);
+    });
+    if (!placed) here(); el.appendChild(ol);
+  })();
+  (function sources() { const ul = $('sources'); D.sources.forEach((s) => { const li = document.createElement('li'); li.textContent = s; ul.appendChild(li); }); })();
+  set('f-built', d3.utcFormat('%-d %b %Y, %H:%M')(new Date(D.built_utc)));
+  if (D.dev && D.dev.generated) set('dv-asof', ' (counted ' + d3.utcFormat('%-d %b %Y')(new Date(D.dev.generated + 'T00:00:00Z')) + ')');
+
+  // ---------- charts
+  function spark(id, series) {
+    const el = $(id); el.replaceChildren();
+    const rr = rows.slice(-30).filter((r) => isFinite(+r[series]));
+    if (rr.length < 2) return;
+    const W = Math.max(140, el.clientWidth || 200), H = 40;
+    const x = d3.scaleLinear().domain([0, rr.length - 1]).range([1, W - 4]);
+    const y = d3.scaleLinear().domain([0, d3.max(rr, (r) => +r[series]) || 1]).range([H - 2, 4]);
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Trend over the last 30 days');
+    svg.append('path').datum(rr).attr('d', d3.area().curve(d3.curveMonotoneX).x((r, i) => x(i)).y0(H - 1).y1((r) => y(+r[series]))).style('fill', 'var(--c1)').style('fill-opacity', 0.15);
+    svg.append('path').datum(rr).attr('d', d3.line().curve(d3.curveMonotoneX).x((r, i) => x(i)).y((r) => y(+r[series]))).style('fill', 'none').style('stroke', 'var(--c1)').style('stroke-width', 1.8);
+    svg.append('circle').attr('cx', x(rr.length - 1)).attr('cy', y(+rr[rr.length - 1][series])).attr('r', 2.8).style('fill', 'var(--c1)');
+  }
+  function bandChart(id, data, opt) {
+    const el = $(id); el.replaceChildren();
+    const wrap = d3.select(el).append('div').attr('class', 'cw');
+    const val = (r, s) => { const v = r[s.f]; return v == null ? NaN : +v * (s.k || 1); };
+    const vals = data.flatMap((r) => opt.series.map((s) => (s.stack ? opt.series.filter((q) => q.stack).reduce((t, q) => t + (val(r, q) || 0), 0) : val(r, s)))).filter(isFinite);
+    if (!data.length || !vals.length) { wrap.append('p').attr('class', 'empty').text(opt.empty || 'No data yet.'); return; }
+    const W = Math.max(280, el.clientWidth || 600), H = opt.h || 220;
+    const y = d3.scaleLinear().domain([0, d3.max(vals.concat(opt.ref != null ? [opt.ref] : [])) || 1]).nice();
+    const yf = opt.fmt || d3.format('~s');
+    const svg = wrap.append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', opt.label);
+    const meas = svg.append('g').attr('class', 'axis'); let mw = 0;
+    y.ticks(4).forEach((t) => { mw = Math.max(mw, meas.append('text').text(yf(t)).node().getComputedTextLength()); }); meas.remove();
+    const m = { t: 10, r: 10, b: 26, l: Math.ceil(mw) + 12 };
+    y.range([H - m.b, m.t]);
+    const key = opt.key || 'day';
+    const x = d3.scaleBand().domain(data.map((r) => r[key])).range([m.l, W - m.r]).padding(0.24);
+    const cx = (r) => x(r[key]) + x.bandwidth() / 2;
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y).attr('y2', y).style('stroke', 'var(--grid)');
+    svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(yf).tickSize(0).tickPadding(7)).select('.domain').remove();
+    const lblF = opt.xfmt || dayLbl;
+    const ticks = []; let lastPx = -1e9;
+    data.forEach((r) => { if (opt.monday !== false && data.length > 21 && utc(r[key]).getUTCDay() !== 1) return; const px = cx(r); if (px - lastPx >= 54 && px >= m.l + 16 && px <= W - m.r - 16) { ticks.push(r[key]); lastPx = px; } });
+    const xa = svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(ticks).tickFormat(lblF).tickSize(4).tickPadding(4));
+    xa.select('.domain').style('stroke', 'var(--axis)'); xa.selectAll('.tick line').style('stroke', 'var(--axis)');
+    if (opt.ref != null) svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(opt.ref)).attr('y2', y(opt.ref)).style('stroke', 'var(--ref)').style('stroke-dasharray', '4 4');
+    const guide = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--ref)').style('opacity', 0);
+    const bars = [];
+    let base = data.map(() => 0);
+    opt.series.forEach((s) => {
+      const c = s.color || 'var(--c1)';
+      const pts = data.filter((r) => isFinite(val(r, s)));
+      if (s.type === 'bar') {
+        const b0 = base.slice();
+        const g = svg.append('g').selectAll('rect').data(data.map((r, i) => ({ r, i }))).join('rect')
+          .attr('x', (d) => x(d.r[key])).attr('width', x.bandwidth()).attr('rx', Math.min(3, x.bandwidth() / 3))
+          .attr('y', (d) => y((s.stack ? b0[d.i] : 0) + (val(d.r, s) || 0))).attr('height', (d) => Math.max(0, y(s.stack ? b0[d.i] : 0) - y((s.stack ? b0[d.i] : 0) + (val(d.r, s) || 0))))
+          .style('fill', c).style('opacity', (d) => (d.r.full_day === false ? 0.4 : 0.92));
+        bars.push(g);
+        if (s.stack) data.forEach((r, i) => { base[i] += val(r, s) || 0; });
+      } else {
+        if (s.area) svg.append('path').datum(pts).attr('d', d3.area().x(cx).y0(y(0)).y1((r) => y(val(r, s)))).style('fill', c).style('fill-opacity', 0.12);
+        svg.append('path').datum(pts).attr('d', d3.line().x(cx).y((r) => y(val(r, s)))).style('fill', 'none').style('stroke', c).style('stroke-width', 2.3).style('stroke-linejoin', 'round');
+        if (!s.nodots) svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', cx).attr('cy', (r) => y(val(r, s))).attr('r', pts.length > 30 ? 1.7 : 3).style('fill', c).style('opacity', (r) => (r.full_day === false ? 0.45 : 1));
+      }
+    });
+    const tip = wrap.append('div').attr('class', 'tip');
+    const tfm = opt.tip || d3.format(',.0f');
+    svg.append('g').selectAll('rect').data(data).join('rect').attr('x', (r) => x(r[key]) - (x.step() * x.padding()) / 2).attr('width', x.step()).attr('y', m.t).attr('height', H - m.b - m.t).style('fill', 'transparent')
+      .on('pointerenter pointermove', function (ev, r) {
+        guide.attr('x1', cx(r)).attr('x2', cx(r)).style('opacity', 0.5);
+        bars.forEach((g) => g.style('opacity', (d) => (d.r[key] === r[key] ? 1 : (d.r.full_day === false ? 0.3 : 0.55))));
+        tip.selectAll('*').remove();
+        tip.append('div').attr('class', 'd').text((opt.tipDate || ((s) => d3.utcFormat('%a %-d %b %Y')(utc(s))))(r[key]) + (r.full_day === false ? ' (part day)' : ''));
+        opt.series.forEach((s) => { const v = val(r, s); tip.append('div').text(s.label + ': ' + (isFinite(v) ? tfm(v) : '—')); });
+        const [px] = d3.pointer(ev, wrap.node()); const tw = tip.node().offsetWidth, ww = wrap.node().clientWidth;
+        tip.style('left', Math.max(0, Math.min(ww - tw, px + 14)) + 'px').style('opacity', 1);
+      })
+      .on('pointerleave', () => { tip.style('opacity', 0); guide.style('opacity', 0); bars.forEach((g) => g.style('opacity', (d) => (d.r.full_day === false ? 0.4 : 0.92))); });
+  }
+  function rewardChart() {
+    const el = $('ch-reward'); el.replaceChildren();
+    const rr = D.schedule.filter((r) => +r.epoch >= 1).map((r) => ({ d: hDate(+r.height), v: +r.reward_per_block, m: +r.miner_per_block, day: +r.issued_per_day, e: +r.epoch }));
+    const wrap = d3.select(el).append('div').attr('class', 'cw');
+    const W = Math.max(280, el.clientWidth || 600), H = 230;
+    const y = d3.scaleLinear().domain([0, d3.max(rr, (r) => r.v)]).nice();
+    const svg = wrap.append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Zycord block reward from launch to 2029');
+    const m = { t: 20, r: 34, b: 24, l: 34 };
+    y.range([H - m.b, m.t]);
+    const x = d3.scaleUtc().domain(d3.extent(rr, (r) => r.d)).range([m.l, W - m.r]);
+    const b0 = hDate(182 * E), b1 = hDate(363 * E);
+    svg.append('rect').attr('x', x(b0)).attr('width', x(b1) - x(b0)).attr('y', m.t).attr('height', H - m.b - m.t).style('fill', 'var(--shade)').style('opacity', 0.1);
+    svg.append('text').attr('x', (x(b0) + x(b1)) / 2).attr('y', m.t - 6).attr('text-anchor', 'middle').text('To staking').attr('class', 'axis').style('fill', 'var(--muted)').style('font-size', '11.5px');
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y).attr('y2', y).style('stroke', 'var(--grid)');
+    svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(0).tickPadding(7)).select('.domain').remove();
+    const xa = svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((W - m.l) / 85))).tickFormat(d3.utcFormat('%b %Y')).tickSize(4).tickPadding(4));
+    xa.select('.domain').style('stroke', 'var(--axis)'); xa.selectAll('.tick line').style('stroke', 'var(--axis)');
+    svg.append('path').datum(rr).attr('d', d3.area().x((r) => x(r.d)).y0(y(0)).y1((r) => y(r.v))).style('fill', 'var(--c1)').style('fill-opacity', 0.12);
+    svg.append('path').datum(rr).attr('d', d3.line().x((r) => x(r.d)).y((r) => y(r.v))).style('fill', 'none').style('stroke', 'var(--c1)').style('stroke-width', 2.3);
+    const nd = hDate(h);
+    svg.append('line').attr('x1', x(nd)).attr('x2', x(nd)).attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--c2)').style('stroke-dasharray', '4 4');
+    svg.append('text').attr('x', x(nd) + 5).attr('y', m.t + 13).text('Now').style('fill', 'var(--c2)').style('font-size', '11.5px').style('font-family', 'var(--sans)');
+    const tip = wrap.append('div').attr('class', 'tip');
+    const dot = svg.append('circle').attr('r', 4.5).style('fill', 'var(--c1)').style('opacity', 0);
+    const bis = d3.bisector((r) => r.d).center;
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.b - m.t).style('fill', 'transparent')
+      .on('pointerenter pointermove', function (ev) {
+        const [px] = d3.pointer(ev, this); const r = rr[bis(rr, x.invert(px))];
+        dot.attr('cx', x(r.d)).attr('cy', y(r.v)).style('opacity', 1);
+        tip.selectAll('*').remove();
+        tip.append('div').attr('class', 'd').text(d3.utcFormat('%-d %b %Y')(r.d) + ' · epoch ' + fmt(r.e));
+        tip.append('div').text('Block reward: ' + f2(r.v) + ' ZCD'); tip.append('div').text('To the miner: ' + f2(r.m) + ' ZCD'); tip.append('div').text('New ZCD per day: ' + fmt(r.day));
+        const [wx] = d3.pointer(ev, wrap.node()); const tw = tip.node().offsetWidth, ww = wrap.node().clientWidth;
+        tip.style('left', Math.max(0, Math.min(ww - tw, wx + 12)) + 'px').style('opacity', 1);
+      })
+      .on('pointerleave', () => { tip.style('opacity', 0); dot.style('opacity', 0); });
+  }
+  function supplyChart() {
+    const el = $('ch-supply'); if (!el) return; el.replaceChildren();
+    const rr = D.schedule.map((r) => ({ d: hDate(+r.height), v: +r.supply, e: +r.epoch })).filter((r) => isFinite(r.v));
+    const wrap = d3.select(el).append('div').attr('class', 'cw');
+    const W = Math.max(280, el.clientWidth || 600), H = 210;
+    const y = d3.scaleLinear().domain([0, d3.max(rr, (r) => r.v)]).nice();
+    const svg = wrap.append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'ZCD issued over time from launch to 2029');
+    const m = { t: 14, r: 14, b: 24, l: 40 };
+    y.range([H - m.b, m.t]);
+    const x = d3.scaleUtc().domain(d3.extent(rr, (r) => r.d)).range([m.l, W - m.r]);
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y).attr('y2', y).style('stroke', 'var(--grid)');
+    svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(d3.format('~s')).tickSize(0).tickPadding(7)).select('.domain').remove();
+    const xa = svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((W - m.l) / 85))).tickFormat(d3.utcFormat('%b %Y')).tickSize(4).tickPadding(4));
+    xa.select('.domain').style('stroke', 'var(--axis)'); xa.selectAll('.tick line').style('stroke', 'var(--axis)');
+    svg.append('path').datum(rr).attr('d', d3.area().x((r) => x(r.d)).y0(y(0)).y1((r) => y(r.v))).style('fill', 'var(--c3)').style('fill-opacity', 0.14);
+    svg.append('path').datum(rr).attr('d', d3.line().x((r) => x(r.d)).y((r) => y(r.v))).style('fill', 'none').style('stroke', 'var(--c3)').style('stroke-width', 2.3);
+    const nd = hDate(h);
+    svg.append('line').attr('x1', x(nd)).attr('x2', x(nd)).attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--c2)').style('stroke-dasharray', '4 4');
+    svg.append('text').attr('x', x(nd) + 5).attr('y', m.t + 12).text('Now').style('fill', 'var(--c2)').style('font-size', '11.5px').style('font-family', 'var(--sans)');
+    const tip = wrap.append('div').attr('class', 'tip');
+    const dot = svg.append('circle').attr('r', 4.5).style('fill', 'var(--c3)').style('opacity', 0);
+    const bis = d3.bisector((r) => r.d).center;
+    svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.b - m.t).style('fill', 'transparent')
+      .on('pointerenter pointermove', function (ev) {
+        const [px] = d3.pointer(ev, this); const r = rr[bis(rr, x.invert(px))];
+        dot.attr('cx', x(r.d)).attr('cy', y(r.v)).style('opacity', 1);
+        tip.selectAll('*').remove();
+        tip.append('div').attr('class', 'd').text(d3.utcFormat('%-d %b %Y')(r.d) + ' · epoch ' + fmt(r.e));
+        tip.append('div').text('Issued: ' + fmt(Math.round(r.v)) + ' ZCD');
+        const [wx] = d3.pointer(ev, wrap.node()); const tw = tip.node().offsetWidth, ww = wrap.node().clientWidth;
+        tip.style('left', Math.max(0, Math.min(ww - tw, wx + 12)) + 'px').style('opacity', 1);
+      })
+      .on('pointerleave', () => { tip.style('opacity', 0); dot.style('opacity', 0); });
+  }
+  const C1 = 'var(--c1)', C2 = 'var(--c2)';
+  function drawAll() {
+    const rd = range > 0 ? rows.slice(-range) : rows;
+    spark('sp-tx', 'txs_7d'); spark('sp-calls', 'calls_7d'); spark('sp-cum', 'cum_txs'); spark('sp-hash', 'hash');
+    bandChart('ch-tx', rd, { label: 'Transactions per day with 7-day average', series: [{ f: 'txs', label: 'Transactions', type: 'bar' }, { f: 'txs_7d', label: '7-day average', color: C2, nodots: true }] });
+    bandChart('ch-cum', rd, { label: 'Transactions since launch, running total', series: [{ f: 'cum_txs', label: 'Since launch', area: true, nodots: true }] });
+    bandChart('ch-contracts', rd.filter((r) => r.day >= '2026-11-03'), { label: 'Smart-contract calls per day', series: [{ f: 'contract_calls', label: 'Contract calls', type: 'bar' }, { f: 'contract_callers', label: 'Different callers', color: C2 }], monday: true });
+    bandChart('ch-keys', rd, { label: 'Signing keys used per day', series: [{ f: 'active_senders', label: 'Keys used', type: 'bar' }, { f: 'keys_7d', label: '7-day average', color: C2, nodots: true }] });
+    bandChart('ch-new', rd, { label: 'First-time keys per day', series: [{ f: 'new_senders', label: 'First-time keys', type: 'bar' }] });
+    bandChart('ch-zcd', rd, { label: 'ZCD sent per day', series: [{ f: 'zcd_sent', label: 'ZCD sent', type: 'bar' }] });
+    bandChart('ch-hash', rd, { label: 'Network hashrate per day, MH/s', series: [{ f: 'hash', label: 'MH/s', area: true }], fmt: d3.format('.1f'), tip: f2 });
+    bandChart('ch-spread', rd, { label: 'Share of blocks won by the largest and top 3 payout addresses', series: [{ f: 'top1_share_pct', label: 'Largest address %' }, { f: 'top3_share_pct', label: 'Top 3 addresses %', color: C2 }], fmt: d3.format('d'), tip: f1 });
+    bandChart('ch-bt', rd, { label: 'Average block time per day', series: [{ f: 'avg_block_s', label: 'Seconds' }], ref: 30, fmt: d3.format('d'), tip: f1 });
+    bandChart('ch-gap', rd, { label: 'Longest wait between blocks per day, minutes', series: [{ f: 'gap_min', label: 'Minutes', type: 'bar' }], fmt: d3.format('d'), tip: f1 });
+    const wk = V.weekly.map((w) => ({ day: w.week, lead: w.commits - w.outside, others: w.outside }));
+    bandChart('ch-commits', wk, { label: 'Commits per week to the Zycord node repository', series: [{ f: 'lead', label: 'Lead developer', type: 'bar', stack: true }, { f: 'others', label: 'Other contributors', type: 'bar', stack: true, color: C2 }], monday: false, xfmt: (s) => d3.utcFormat('%-d %b')(utc(s)), tipDate: (s) => 'Week of ' + d3.utcFormat('%-d %b %Y')(utc(s)) });
+    bandChart('ch-payout', rd, { label: 'Different payout addresses winning blocks per day', series: [{ f: 'payout_addresses', label: 'Addresses', type: 'bar' }], fmt: d3.format('d') });
+    rewardChart(); supplyChart();
+  }
+  document.querySelectorAll('.seg button').forEach((bt) => bt.addEventListener('click', () => {
+    range = +bt.dataset.range; document.querySelectorAll('.seg button').forEach((o) => o.setAttribute('aria-pressed', o === bt ? 'true' : 'false')); drawAll();
+  }));
+  const links = [...document.querySelectorAll('.nav a')];
+  const secs = links.map((l) => document.querySelector(l.getAttribute('href')));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) links.forEach((l) => l.classList.toggle('on', l.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-45% 0px -50% 0px' });
+    secs.forEach((s) => s && io.observe(s));
+  }
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(drawAll, 150); });
+  drawAll();
+
+  // ---------- Mine Zycord calculator
+  (function mineCalc() {
+    // [group, name, cores, kH/s, watts] — approximate RandomX figures, rounded
+    const RAW = [
+      ['AMD Ryzen desktop', 'Ryzen 9 9950X3D', 16, 24, 200], ['AMD Ryzen desktop', 'Ryzen 9 9950X', 16, 23, 200], ['AMD Ryzen desktop', 'Ryzen 9 9900X3D', 12, 17.5, 150], ['AMD Ryzen desktop', 'Ryzen 9 9900X', 12, 17, 150],
+      ['AMD Ryzen desktop', 'Ryzen 7 9800X3D', 8, 12, 120], ['AMD Ryzen desktop', 'Ryzen 7 9700X', 8, 11, 90], ['AMD Ryzen desktop', 'Ryzen 5 9600X', 6, 8.5, 85], ['AMD Ryzen desktop', 'Ryzen 5 9600', 6, 8, 75],
+      ['AMD Ryzen desktop', 'Ryzen 9 7950X3D', 16, 21, 160], ['AMD Ryzen desktop', 'Ryzen 9 7950X', 16, 21, 190], ['AMD Ryzen desktop', 'Ryzen 9 7900X3D', 12, 16, 140], ['AMD Ryzen desktop', 'Ryzen 9 7900X', 12, 16, 150],
+      ['AMD Ryzen desktop', 'Ryzen 9 7900', 12, 15, 110], ['AMD Ryzen desktop', 'Ryzen 7 7800X3D', 8, 11, 100], ['AMD Ryzen desktop', 'Ryzen 7 7700X', 8, 10, 105], ['AMD Ryzen desktop', 'Ryzen 7 7700', 8, 9.5, 90],
+      ['AMD Ryzen desktop', 'Ryzen 5 7600X', 6, 8, 90], ['AMD Ryzen desktop', 'Ryzen 5 7600', 6, 7.5, 75], ['AMD Ryzen desktop', 'Ryzen 7 8700G', 8, 6.5, 85], ['AMD Ryzen desktop', 'Ryzen 5 8600G', 6, 6, 70],
+      ['AMD Ryzen desktop', 'Ryzen 5 8500G', 6, 4.5, 60], ['AMD Ryzen desktop', 'Ryzen 9 5950X', 16, 16, 140], ['AMD Ryzen desktop', 'Ryzen 9 5900XT', 16, 15, 140], ['AMD Ryzen desktop', 'Ryzen 9 5900X', 12, 12.5, 130],
+      ['AMD Ryzen desktop', 'Ryzen 7 5800X3D', 8, 9.5, 105], ['AMD Ryzen desktop', 'Ryzen 7 5800X', 8, 9, 105], ['AMD Ryzen desktop', 'Ryzen 7 5700X3D', 8, 8.5, 95], ['AMD Ryzen desktop', 'Ryzen 7 5700X', 8, 8.5, 80],
+      ['AMD Ryzen desktop', 'Ryzen 7 5700G', 8, 5.5, 75], ['AMD Ryzen desktop', 'Ryzen 5 5600X3D', 6, 7, 85], ['AMD Ryzen desktop', 'Ryzen 5 5600X', 6, 7.5, 76], ['AMD Ryzen desktop', 'Ryzen 5 5600', 6, 7, 70],
+      ['AMD Ryzen desktop', 'Ryzen 5 5600G', 6, 5, 65], ['AMD Ryzen desktop', 'Ryzen 5 5500', 6, 5, 60], ['AMD Ryzen desktop', 'Ryzen 9 3950X', 16, 14, 140], ['AMD Ryzen desktop', 'Ryzen 9 3900X', 12, 11.5, 130],
+      ['AMD Ryzen desktop', 'Ryzen 7 3800X', 8, 8, 105], ['AMD Ryzen desktop', 'Ryzen 7 3700X', 8, 7.5, 90], ['AMD Ryzen desktop', 'Ryzen 5 3600X', 6, 6, 85], ['AMD Ryzen desktop', 'Ryzen 5 3600', 6, 5.8, 75],
+      ['AMD Ryzen desktop', 'Ryzen 7 2700X', 8, 5, 105], ['AMD Ryzen desktop', 'Ryzen 5 2600', 6, 3.8, 70], ['AMD Ryzen desktop', 'Ryzen 7 1700', 8, 4.3, 80], ['AMD Ryzen desktop', 'Ryzen 5 1600', 6, 3.2, 70],
+      ['AMD Ryzen laptop', 'Ryzen 9 9955HX', 16, 19, 120], ['AMD Ryzen laptop', 'Ryzen 9 7945HX', 16, 17, 110], ['AMD Ryzen laptop', 'Ryzen AI 9 HX 370', 12, 8, 55], ['AMD Ryzen laptop', 'Ryzen 9 7940HS', 8, 6.5, 60],
+      ['AMD Ryzen laptop', 'Ryzen 7 8845HS', 8, 6.5, 55], ['AMD Ryzen laptop', 'Ryzen 7 7840HS', 8, 6.3, 55], ['AMD Ryzen laptop', 'Ryzen 7 6800H', 8, 5, 50], ['AMD Ryzen laptop', 'Ryzen 7 5800H', 8, 5, 45],
+      ['AMD Threadripper', 'Threadripper PRO 7995WX', 96, 80, 350], ['AMD Threadripper', 'Threadripper 9980X', 64, 70, 350], ['AMD Threadripper', 'Threadripper PRO 7985WX', 64, 62, 350], ['AMD Threadripper', 'Threadripper 7980X', 64, 60, 350],
+      ['AMD Threadripper', 'Threadripper PRO 5995WX', 64, 52, 280], ['AMD Threadripper', 'Threadripper 3990X', 64, 44, 280], ['AMD Threadripper', 'Threadripper 9970X', 32, 38, 320], ['AMD Threadripper', 'Threadripper 7970X', 32, 36, 330],
+      ['AMD Threadripper', 'Threadripper PRO 5975WX', 32, 32, 280], ['AMD Threadripper', 'Threadripper 3970X', 32, 30, 280], ['AMD Threadripper', 'Threadripper 7960X', 24, 28, 300], ['AMD Threadripper', 'Threadripper PRO 5965WX', 24, 25, 280],
+      ['AMD Threadripper', 'Threadripper 3960X', 24, 23, 280], ['AMD Threadripper', 'Threadripper 2990WX', 32, 18, 250], ['AMD Threadripper', 'Threadripper 1950X', 16, 10, 180],
+      ['AMD EPYC', 'EPYC 9965', 192, 130, 500], ['AMD EPYC', 'EPYC 9755', 128, 120, 500], ['AMD EPYC', 'EPYC 9754', 128, 100, 400], ['AMD EPYC', 'EPYC 9654', 96, 90, 400],
+      ['AMD EPYC', 'EPYC 9554', 64, 60, 360], ['AMD EPYC', 'EPYC 9474F', 48, 52, 360], ['AMD EPYC', 'EPYC 9454', 48, 50, 290], ['AMD EPYC', 'EPYC 9374F', 32, 38, 320],
+      ['AMD EPYC', 'EPYC 9354', 32, 34, 280], ['AMD EPYC', 'EPYC 9254', 24, 26, 200], ['AMD EPYC', 'EPYC 9124', 16, 16, 200], ['AMD EPYC', 'EPYC 4564P', 16, 21, 170],
+      ['AMD EPYC', 'EPYC 4464P', 12, 14, 85], ['AMD EPYC', 'EPYC 7773X', 64, 56, 280], ['AMD EPYC', 'EPYC 7763', 64, 52, 280], ['AMD EPYC', 'EPYC 7713', 64, 50, 225],
+      ['AMD EPYC', 'EPYC 7B13', 64, 50, 240], ['AMD EPYC', 'EPYC 7742', 64, 45, 260], ['AMD EPYC', 'EPYC 7702', 64, 44, 200], ['AMD EPYC', 'EPYC 7543', 32, 30, 225],
+      ['AMD EPYC', 'EPYC 7502', 32, 27, 200], ['AMD EPYC', 'EPYC 7443', 24, 23, 200], ['AMD EPYC', 'EPYC 7402', 24, 21, 180], ['AMD EPYC', 'EPYC 7313', 16, 15, 155],
+      ['AMD EPYC', 'EPYC 7302', 16, 13, 155], ['AMD EPYC', 'EPYC 7601', 32, 18, 180], ['AMD EPYC', 'EPYC 7551', 32, 17, 180],
+      ['Intel Core desktop', 'Core Ultra 9 285K', 24, 16, 250], ['Intel Core desktop', 'Core Ultra 7 265K', 20, 13.5, 220], ['Intel Core desktop', 'Core Ultra 5 245K', 14, 10, 160], ['Intel Core desktop', 'Core i9-14900KS', 24, 15.5, 250],
+      ['Intel Core desktop', 'Core i9-14900K', 24, 15, 220], ['Intel Core desktop', 'Core i9-14900', 24, 14, 180], ['Intel Core desktop', 'Core i7-14700K', 20, 12, 190], ['Intel Core desktop', 'Core i7-14700', 20, 11.5, 160],
+      ['Intel Core desktop', 'Core i5-14600K', 14, 9, 150], ['Intel Core desktop', 'Core i5-14400', 10, 6, 100], ['Intel Core desktop', 'Core i9-13900KS', 24, 15, 240], ['Intel Core desktop', 'Core i9-13900K', 24, 14.5, 220],
+      ['Intel Core desktop', 'Core i7-13700K', 16, 11, 180], ['Intel Core desktop', 'Core i5-13600K', 14, 8.5, 150], ['Intel Core desktop', 'Core i5-13400', 10, 6, 90], ['Intel Core desktop', 'Core i9-12900K', 16, 12, 200],
+      ['Intel Core desktop', 'Core i7-12700K', 12, 9.5, 160], ['Intel Core desktop', 'Core i5-12600K', 10, 7, 125], ['Intel Core desktop', 'Core i5-12400', 6, 5, 75], ['Intel Core desktop', 'Core i3-12100', 4, 3, 55],
+      ['Intel Core desktop', 'Core i9-11900K', 8, 6, 170], ['Intel Core desktop', 'Core i7-11700K', 8, 6, 160], ['Intel Core desktop', 'Core i5-11400', 6, 4.5, 100], ['Intel Core desktop', 'Core i9-10900K', 10, 6.5, 190],
+      ['Intel Core desktop', 'Core i7-10700K', 8, 5.5, 160], ['Intel Core desktop', 'Core i5-10600K', 6, 4.5, 125], ['Intel Core desktop', 'Core i5-10400', 6, 4.2, 90], ['Intel Core desktop', 'Core i3-10100', 4, 2.5, 60],
+      ['Intel Core desktop', 'Core i9-9900K', 8, 5, 150], ['Intel Core desktop', 'Core i7-9700K', 8, 4.5, 130], ['Intel Core desktop', 'Core i7-8700K', 6, 3.8, 120], ['Intel Core desktop', 'Core i7-7700K', 4, 2.5, 90],
+      ['Intel Core desktop', 'Core i7-6700K', 4, 2.3, 85],
+      ['Intel Core laptop', 'Core i9-14900HX', 24, 13, 130], ['Intel Core laptop', 'Core i9-13980HX', 24, 13, 130], ['Intel Core laptop', 'Core Ultra 9 185H', 16, 9, 70], ['Intel Core laptop', 'Core Ultra 7 155H', 16, 8, 60],
+      ['Intel Core laptop', 'Core i7-13700H', 14, 7, 60], ['Intel Core laptop', 'Core i7-12700H', 14, 6.5, 60], ['Intel Core laptop', 'Core i7-1260P', 12, 4.5, 35], ['Intel Core laptop', 'Core i5-1235U', 10, 3, 25],
+      ['Intel Xeon', 'Xeon 6980P', 128, 120, 500], ['Intel Xeon', 'Xeon Platinum 8592+', 64, 70, 350], ['Intel Xeon', 'Xeon Platinum 8480+', 56, 50, 350], ['Intel Xeon', 'Xeon w9-3495X', 56, 55, 350],
+      ['Intel Xeon', 'Xeon Platinum 8380', 40, 30, 270], ['Intel Xeon', 'Xeon Gold 6430', 32, 26, 270], ['Intel Xeon', 'Xeon Gold 6338', 32, 22, 205], ['Intel Xeon', 'Xeon Gold 6348', 28, 20, 235],
+      ['Intel Xeon', 'Xeon Platinum 8280', 28, 17, 205], ['Intel Xeon', 'Xeon Gold 6248R', 24, 15, 205], ['Intel Xeon', 'Xeon Gold 6248', 20, 11, 150], ['Intel Xeon', 'Xeon E5-2699 v4', 22, 12, 145],
+      ['Intel Xeon', 'Xeon E5-2690 v4', 14, 8.5, 135], ['Intel Xeon', 'Xeon E5-2680 v4', 14, 8, 120], ['Intel Xeon', 'Xeon E5-2697 v2', 12, 5.5, 130],
+      ['Apple', 'Apple M4 Max', 16, 9, 60], ['Apple', 'Apple M4 Pro', 14, 7, 45], ['Apple', 'Apple M4', 10, 4, 25], ['Apple', 'Apple M3 Max', 16, 7, 50],
+      ['Apple', 'Apple M3 Pro', 12, 4.2, 30], ['Apple', 'Apple M3', 8, 3.3, 22], ['Apple', 'Apple M2 Ultra', 24, 10, 80], ['Apple', 'Apple M2 Max', 12, 5, 40],
+      ['Apple', 'Apple M2 Pro', 12, 4, 35], ['Apple', 'Apple M2', 8, 3, 22], ['Apple', 'Apple M1 Ultra', 20, 9.5, 70], ['Apple', 'Apple M1 Max', 10, 5, 35],
+      ['Apple', 'Apple M1 Pro', 10, 4.5, 30], ['Apple', 'Apple M1', 8, 2.5, 20],
+      ['ARM servers', 'AWS Graviton4', 96, 30, 250], ['ARM servers', 'AWS Graviton3', 64, 20, 200], ['ARM servers', 'Ampere Altra Max M128-30', 128, 18, 250], ['ARM servers', 'Ampere Altra Q80-30', 80, 15, 210]];
+    const CPUS = RAW.map(([g, nm, c, h, w]) => [(g.startsWith('AMD') ? 'AMD ' : g.startsWith('Intel') ? 'Intel ' : '') + nm + ' (' + c + ' cores)', h, w, g]);
+    CPUS.push(['Custom (enter your own)', '', '', 'Other']);
+    const CUSTOM = CPUS.length - 1;
+    const norm = (s) => s.toLowerCase().replace(/[-_/,()]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const keys = CPUS.map((c) => { const n = norm(c[0] + ' ' + c[3]); return n + ' ' + n.replace(/ /g, ''); });
+    const sel = $('mc-cpu'), q = $('mc-q'), cnt = $('mc-cnt');
+    function fill(list) {
+      const cur = +sel.value; sel.innerHTML = ''; let grp = null, og = null;
+      list.forEach((i) => { const c = CPUS[i]; if (c[3] !== grp) { grp = c[3]; og = document.createElement('optgroup'); og.label = grp; sel.appendChild(og); }
+        const o = document.createElement('option'); o.value = i; o.textContent = c[0]; og.appendChild(o); });
+      if (list.includes(cur)) sel.value = cur;
+    }
+    function matches(text) {
+      const t = norm(text).split(' ').filter(Boolean);
+      const out = []; CPUS.forEach((c, i) => { if (i !== CUSTOM && t.every((w) => keys[i].includes(w))) out.push(i); });
+      return out;
+    }
+    function search(applyFirst) {
+      const text = q.value.trim(); const m = text ? matches(text) : CPUS.map((c, i) => i).filter((i) => i !== CUSTOM);
+      fill(m.concat([CUSTOM]));
+      cnt.classList.toggle('none', !!text && !m.length);
+      cnt.textContent = !text ? CUSTOM + ' CPUs in the list' : m.length ? m.length + (m.length === 1 ? ' match' : ' matches') + ' for “' + text + '”' : 'No match for “' + text + '”. Choose Custom and type your own figures.';
+      if (m.length && (applyFirst || !m.includes(+sel.value))) { const best = m.reduce((a, i) => (CPUS[i][0].length < CPUS[a][0].length ? i : a), m[0]); sel.value = best; pick(); }
+    }
+
+    const netDefault = Math.round(last.hash * 100) / 100;
+    const ep = Math.floor(N.height / E); const sr = D.schedule.find((r) => +r.epoch === ep);
+    const rewMiner = sr ? +sr.reward_per_block * 0.94 : 18.9;
+    const supplyNow = sr ? +sr.supply + +sr.reward_per_block * (N.height - ep * E) : null;
+    const usd = (v) => (v >= 1 ? '$' + d3.format(',.2f')(v) : v >= 0.01 ? '$' + d3.format('.4f')(v) : '$' + d3.format('.6f')(v));
+    const big = (v) => (v >= 1e9 ? '$' + d3.format('.2f')(v / 1e9) + 'B' : v >= 1e6 ? '$' + d3.format('.2f')(v / 1e6) + 'M' : '$' + d3.format(',.0f')(v));
+    const pick = () => { const c = CPUS[+sel.value]; if (c[1] !== '') { $('mc-hash').value = c[1]; $('mc-watt').value = c[2]; } calc(); };
+    function calc() {
+      const hk = +$('mc-hash').value || 0, w = +$('mc-watt').value || 0, n = Math.max(1, +$('mc-n').value || 1), kwh = +$('mc-kwh').value || 0, net = +$('mc-net').value || 0;
+      const mine = hk * n / 1000; // MH/s
+      const share = mine > 0 ? mine / (net + mine) : 0;
+      const zcd = share * E * rewMiner;
+      const cost = (w * n * 24 / 1000) * kwh;
+      set('mc-rew', f2(rewMiner) + ' ZCD');
+      set('mc-share', share ? d3.format('.2%')(share) : '—');
+      set('mc-zcd', zcd ? d3.format(',.1f')(zcd) : '—');
+      set('mc-cost', '$' + d3.format(',.2f')(cost));
+      if (zcd > 0 && cost > 0) {
+        const p = cost / zcd;
+        set('mc-price', usd(p)); set('mc-fdv', big(p * 62.7e6)); set('mc-mcap', supplyNow ? big(p * supplyNow) : '—'); window.ZP_MINE_FDV = p * 62.7e6;
+      } else { set('mc-price', zcd > 0 ? '$0 (free power)' : '—'); set('mc-fdv', '—'); set('mc-mcap', '—'); window.ZP_MINE_FDV = null; }
+      document.dispatchEvent(new Event('zp-mine'));
+    }
+    sel.addEventListener('change', pick);
+    ['mc-hash', 'mc-watt', 'mc-n', 'mc-kwh', 'mc-net'].forEach((id) => $(id).addEventListener('input', () => { if (id === 'mc-hash' || id === 'mc-watt') sel.value = CUSTOM; calc(); }));
+    q.addEventListener('input', () => search(false));
+    $('mc-form').addEventListener('submit', (e) => { e.preventDefault(); search(true); q.blur(); });
+    $('mc-net').value = netDefault; search(false); sel.value = 1; pick();
+    const dlg = $('mine');
+    const open = (e) => { if (e) e.preventDefault(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); };
+    $('open-mine').addEventListener('click', open); $('nav-mine').addEventListener('click', open);
+    $('close-mine').addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    if (location.hash === '#mine') open();
+  })();
+
+  // ---------- Market statistics (Layer 1 FDVs from CoinGecko: live in the browser, saved snapshot as fallback)
+  (function marketStats() {
+    const dlg = $('market'); const snap = window.ZP_MARKET;
+    if (!dlg || !snap) return;
+    const API = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=layer-1&order=market_cap_desc&per_page=250&page=';
+    const POW = new Set(snap.pow_ids || []);
+    let M = snap, mode = 'snap', group = 'all', tried = false, err = '';
+    const usdB = (v) => v >= 1e12 ? '$' + d3.format('.2f')(v / 1e12) + 'T' : v >= 1e9 ? '$' + d3.format('.2f')(v / 1e9) + 'B' : v >= 1e6 ? '$' + d3.format('.1f')(v / 1e6) + 'M' : v >= 1e3 ? '$' + d3.format(',.0f')(v / 1e3) + 'k' : '$' + d3.format(',.0f')(v);
+    const utc = (iso) => { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; };
+    const BANDS = [[0, 1e6, 'Under $1M'], [1e6, 1e7, '$1M–10M'], [1e7, 1e8, '$10M–100M'], [1e8, 1e9, '$100M–1B'], [1e9, Infinity, 'Over $1B']];
+    const GROUPS = [
+      ['all', 'All Layer 1', () => true],
+      ['exbe', 'Without BTC & ETH', (r) => r[0] !== 'bitcoin' && r[0] !== 'ethereum'],
+      ['pow', 'Proof-of-work L1s', (r) => POW.has(r[0])],
+      ['top', 'Top 100 by market cap', (r) => r[5] && r[5] <= 100],
+      ['mid', 'Ranked 101–500', (r) => r[5] > 100 && r[5] <= 500]];
+    const seg = $('mk-seg');
+    seg.innerHTML = GROUPS.map((g) => '<button type="button" data-g="' + g[0] + '" aria-pressed="' + (g[0] === group) + '">' + g[1] + '</button>').join('');
+    seg.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; group = b.dataset.g; seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); render(); });
+    function render() {
+      const withFdv = M.rows.filter((r) => r[3] > 0);
+      const g = GROUPS.find((x) => x[0] === group);
+      const v = withFdv.filter(g[2]).map((r) => r[3]).sort((a, b) => a - b);
+      const badge = mode === 'live' ? '<span class="live">Live</span>' : '<span class="live snap">Saved snapshot</span>';
+      const fetchedTxt = mode === 'live' ? 'fetched ' + utc(M.fetched_utc) : 'saved ' + utc(M.fetched_utc) + (tried ? (err ? '; live data could not be loaded just now' : '; checking for live data…') : '');
+      $('mk-src').innerHTML = badge + 'Source: <b>CoinGecko</b>, Layer 1 category (' + d3.format(',')(M.rows.length) + ' coins). Prices as of <b>' + utc(M.data_as_of_utc) + '</b>, ' + fetchedTxt + '.';
+      set('mk-n', v.length ? d3.format(',')(v.length) : '—');
+      set('mk-med', v.length ? usdB(d3.median(v)) : '—');
+      set('mk-avg', v.length ? usdB(d3.mean(v)) : '—');
+      const zy = window.ZP_MINE_FDV; const counts = BANDS.map((b) => v.filter((x) => x >= b[0] && x < b[1]).length); const mx = d3.max(counts) || 1;
+      $('mk-bars').innerHTML = BANDS.map((b, i) => {
+        const here = zy > 0 && zy >= b[0] && zy < b[1];
+        return '<div class="bar' + (here ? ' zy' : '') + '"><span>' + b[2] + '</span><span class="tr"><span class="fl" style="width:' + (counts[i] / mx * 100).toFixed(1) + '%"></span></span><span class="n">' + counts[i] + '</span></div>';
+      }).join('');
+      $('mk-zy').innerHTML = zy > 0 ? 'Highlighted band: Zycord’s cost to mine, at the calculator’s current settings, is <b>' + usdB(zy) + '</b> fully diluted.' : 'Open “Mine Zycord” and enter a CPU and electricity price to mark Zycord’s cost to mine here.';
+      const RANKS = [['1–100', (r) => r[5] && r[5] <= 100], ['101–250', (r) => r[5] > 100 && r[5] <= 250], ['251–500', (r) => r[5] > 250 && r[5] <= 500], ['501 and below', (r) => r[5] > 500]];
+      $('mk-rank').innerHTML = RANKS.map(([lab, f]) => { const a = withFdv.filter(f).map((r) => r[3]); return '<tr><td>' + lab + '</td><td>' + a.length + '</td><td>' + (a.length ? usdB(d3.median(a)) : '—') + '</td><td>' + (a.length ? usdB(d3.mean(a)) : '—') + '</td></tr>'; }).join('');
+    }
+    async function loadLive() {
+      if (tried) return; tried = true; render();
+      try {
+        let c = null; try { c = JSON.parse(localStorage.getItem('zp_market_v1') || 'null'); } catch (e) { c = null; }
+        let d;
+        if (c && c.rows && Date.now() - Date.parse(c.fetched_utc) < 30 * 60e3) d = c;
+        else {
+          let all = [];
+          for (let p = 1; p <= 4; p++) {
+            const r = await fetch(API + p, { headers: { Accept: 'application/json' } });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const j = await r.json(); if (!Array.isArray(j)) throw new Error('bad data');
+            all = all.concat(j); if (j.length < 250) break;
+            await new Promise((s) => setTimeout(s, 1500));
+          }
+          const seen = new Set(); const rows = [];
+          all.forEach((r) => { if (seen.has(r.id)) return; seen.add(r.id); rows.push([r.id, (r.symbol || '').toUpperCase(), r.name, r.fully_diluted_valuation, r.market_cap, r.market_cap_rank, r.last_updated]); });
+          if (rows.length < 50) throw new Error('too few coins');
+          const asOf = rows.reduce((m, r) => (r[6] && r[6] > m ? r[6] : m), '');
+          d = { rows, fetched_utc: new Date().toISOString(), data_as_of_utc: asOf };
+          try { localStorage.setItem('zp_market_v1', JSON.stringify(d)); } catch (e) { /* storage unavailable */ }
+        }
+        M = { rows: d.rows, fetched_utc: d.fetched_utc, data_as_of_utc: d.data_as_of_utc }; mode = 'live';
+      } catch (e) { err = String(e && e.message || e); }
+      render();
+    }
+    const open = (e) => { if (e) e.preventDefault(); render(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); loadLive(); };
+    $('open-mkt').addEventListener('click', open); $('nav-market').addEventListener('click', open);
+    $('close-mkt').addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    document.addEventListener('zp-mine', () => { if (dlg.open) render(); });
+    if (location.hash === '#market') open();
+  })();
+
+  // ---------- Speed comparison (Chainspect snapshot + Zycord measured by Pulse)
+  (function speedCmp() {
+    const dlg = $('speed'); const S = window.ZP_SPEED;
+    if (!dlg || !S) return;
+    const zyTps = avg(a, 'txs') / 86400;
+    const zyBlock = D.reliability && D.reliability.avg_block_s_all ? D.reliability.avg_block_s_all : 30;
+    const rows = S.rows.map((r) => ({ name: r[0], tps: r[1], max: r[2], th: r[3], bt: r[4], fin: r[5], zy: false }));
+    const zyMax = S.zycord_max100 ? S.zycord_max100.tps : 'pending';
+    rows.push({ name: 'Zycord', tps: zyTps, max: zyMax, th: 294000, thMark: '*', bt: zyBlock, fin: null, zy: true });
+    const num = (v) => v === 'pending' ? 'Pending' : v == null ? '—' : v >= 100 ? d3.format(',.0f')(v) : v >= 1 ? d3.format(',.1f')(v) : d3.format('.2~r')(v);
+    const dur = (s) => { if (s == null) return '—'; if (s < 1) return Math.round(s * 1000) + ' ms'; if (s < 60) return d3.format('.3~r')(s) + ' s'; if (s < 3600) { const m = Math.floor(s / 60), r = Math.round(s % 60); return m + 'm' + (r ? ' ' + r + 's' : ''); } return d3.format('.2~r')(s / 3600) + 'h'; };
+    const fin = (r) => r.zy ? 'No fixed finality' : r.fin === 0 ? 'Instant' : dur(r.fin);
+    const COLS = [['tps', 'Tx/s, last hour', -1], ['max', 'Highest (100 blocks)', -1], ['th', 'Theoretical max', -1], ['bt', 'Block time', 1], ['fin', 'Finality', 1]];
+    let key = 'tps';
+    const seg = $('sp-seg');
+    seg.innerHTML = '<span class="src" style="align-self:center">Sort by:</span>' + COLS.map((c) => '<button type="button" data-k="' + c[0] + '" aria-pressed="' + (c[0] === key) + '">' + (c[0] === 'tps' ? 'Real use' : c[0] === 'max' ? 'Highest' : c[0] === 'th' ? 'Theoretical' : c[0] === 'bt' ? 'Block time' : 'Finality') + '</button>').join('');
+    seg.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; key = b.dataset.k; seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); render(); });
+    $('sp-head').innerHTML = '<th>Chain</th>' + COLS.map((c) => '<th>' + c[1] + '</th>').join('');
+    function render() {
+      const dir = COLS.find((c) => c[0] === key)[2];
+      const sorted = rows.slice().sort((x, y) => { const vx = typeof x[key] === 'number' ? x[key] : null, vy = typeof y[key] === 'number' ? y[key] : null; if (vx == null && vy == null) return 0; if (vx == null) return 1; if (vy == null) return -1; return dir * (vx - vy); });
+      $('sp-rows').innerHTML = sorted.map((r) => '<tr' + (r.zy ? ' class="zy"' : '') + '><td>' + r.name + (r.zy ? ' <span class="src">(Zycord Pulse data, except *)</span>' : '') + '</td><td data-l="Tx/s, last hour">' + num(r.tps) + '</td><td data-l="Highest (100 blocks)">' + num(r.max) + '</td><td data-l="Theoretical max">' + num(r.th) + (r.thMark ? '<sup>' + r.thMark + '</sup>' : '') + '</td><td data-l="Block time">' + dur(r.bt) + '</td><td data-l="Finality">' + fin(r) + '</td></tr>').join('');
+    }
+    const t = new Date(S.read_utc).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+    const zt = new Date(D.now.read_utc).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+    $('sp-src').innerHTML = '<span class="live snap">Snapshot</span>Source: <b>Chainspect</b>, updated <b>' + t + '</b> (14 Layer 1 chains). Zycord: Zycord Pulse, updated <b>' + zt + '</b>.';
+    render();
+    const M = S.zycord_max100;
+    if (M && M.from != null) {
+      const f = d3.format(',');
+      const when = M.start_utc ? ' on ' + new Date(M.start_utc * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '';
+      const mins = M.span_s ? ' over ' + Math.round(M.span_s / 60) + ' minutes' : '';
+      const upto = M.checked_to ? ' (blocks 0 to ' + f(M.checked_to) + ' checked)' : '';
+      const el = $('sp-zymax'); el.textContent = 'Zycord’s busiest 100 blocks so far: blocks ' + f(M.from) + ' to ' + f(M.to) + when + ', ' + f(M.txs) + ' transactions' + mins + upto + '.'; el.hidden = false;
+    }
+    const open = (e) => { if (e) e.preventDefault(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); };
+    $('open-spd').addEventListener('click', open); $('nav-speed').addEventListener('click', open);
+    $('close-spd').addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    if (location.hash === '#speed') open();
+  })();
+})();
+</script>
+</body>
+</html>

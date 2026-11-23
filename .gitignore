@@ -1,0 +1,5 @@
+pulse-work/
+tools/base/
+tools/pulsescan/pulsescan
+*.tmp
+__pycache__/

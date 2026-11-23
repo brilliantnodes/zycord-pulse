@@ -1,0 +1,15 @@
+window.ZP_SPEED={"source": "Chainspect", "source_url": "https://chainspect.app/dashboard", "read_utc": "2026-11-23T17:17:00Z", "read_note": "Chainspect leaderboard as of 23 Nov 2026, 17:17 UTC; Avalanche, Algorand, Bitcoin and Cardano from Chainspect comparison pages read at about 17:25 UTC", "fields": ["chain", "tps_1h", "tps_max_100_blocks", "tps_theoretical", "block_time_s", "finality_s"], "zycord_max100": {"tps": 0.0181, "from": 117853, "to": 117952, "txs": 58, "span_s": 3196, "start_utc": 1794868084, "checked_to": 137448, "read_dubai": "2026-11-23 22:11", "source": "Zycord Pulse desk scan, job 20261123_2206_pulse_max100_v4 (all heights 0-137,448, no gaps)"},"rows":[
+["Internet Computer (ICP)", 5040, 25621, 209708, 0.48, 0],
+["Solana", 3090, 11015, 65000, 0.215, 0.4],
+["Sui", 287.4, 1204, 120000, 0.064, 0],
+["BNB Chain", 269.7, 3252, 6349, 0.451, 0.65],
+["Aptos", 246.3, 12933, 160000, 0.04, 0],
+["TRON", 176.9, 439.4, 2516, 3, 57],
+["Stellar", 159.3, 227.6, 3351, 4.99, 0],
+["TON", 57.72, 1542, 104715, 0.409, 0.8],
+["Ethereum", 26.23, 74.91, 238.1, 12, 768],
+["NEAR", 9.58, 4135, 1000000, 0.571, 1.2],
+["Algorand", 7.55, 5716, 9384, 2.77, 0],
+["Bitcoin", 7.78, 13.2, 7, 333, 3600],
+["Avalanche", 6.41, 241.3, 1191, 0.876, 2],
+["Cardano", 0.4, 11.77, 18.02, 20.04, 120]]};
