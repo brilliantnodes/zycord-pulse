@@ -285,13 +285,13 @@ dialog.sp{max-width:980px}
   <div class="card"><p class="lab">ZCD per block now</p><p class="big" id="m-rew">—</p><p class="chg"><span id="m-miner">—</span> to the miner (94%)</p></div>
   <div class="card"><p class="lab">Current epoch</p><p class="big" id="m-epoch">—</p><p class="chg">Block <span id="m-inep">—</span> of 2,880 (one epoch is a day)</p></div>
   <div class="card"><p class="lab">New ZCD per day</p><p class="big" id="m-day">—</p><p class="chg">Shrinks a little every day (about 0.1%), so it halves roughly every 2 years</p></div>
-  <div class="card"><p class="lab">ZCD issued so far</p><p class="big" id="m-sup">—</p><p class="chg">No premine; about 62.7 million in the long run</p></div>
+  <div class="card"><p class="lab">ZCD issued so far</p><p class="big" id="m-sup">—</p><p class="chg">No premine; about 61.8 million by 2038, then a small tail</p></div>
  </div>
  <div class="card progress" style="margin-bottom:14px"><h3>Countdown to bonding</h3><p class="sub"><b id="m-days">—</b> days and <span id="m-blocks">—</span> blocks until epoch 182 (7 Apr 2027), when staking can open once a release switches it on.</p>
   <div class="track" style="height:12px"><i id="m-bar"></i></div><div class="ends"><span>Launch, 7 Oct 2026</span><span><span id="m-pct">—</span>% of the way</span><span>Bonding, 7 Apr 2027</span></div></div>
  <div class="grid">
   <div class="card"><h3>ZCD per block, past and future</h3><p class="sub">Full reward of one 30-second block, to 2029. Dashed line: now. Shaded: the move from mining to staking; after it, the same daily amount is paid per 5-second slot.</p><div class="chart" id="ch-reward"></div></div>
-  <div class="card"><h3>Issued supply</h3><p class="sub">ZCD created so far against the long-run total of about 62.7 million, and how it was split.</p>
+  <div class="card"><h3>Issued supply</h3><p class="sub">ZCD created so far against the 61.8 million the schedule issues by September 2038, and how it was split. After that a tail of 0.33 ZCD per block continues, so there is no fixed maximum.</p>
    <div class="bar"><div class="lbl"><span>Issued so far</span><span id="s-pct">—</span></div><div class="track"><i id="s-bar"></i></div></div>
    <div class="split" id="s-split" aria-hidden="true"></div>
    <div class="keyrows" id="s-rows"></div>
@@ -328,6 +328,7 @@ dialog.sp{max-width:980px}
    <li>Supply endpoints: total supply is every ZCD created by block subsidies up to our node's height, computed exactly from Zycord's emission parameters; circulating supply is total supply minus the treasury. The founder's 3% is counted as circulating. Fees are not counted.</li>
    <li>Issued supply follows Zycord's reward schedule up to the current block. The split uses the rule in the code: 94% to the miner, 3% founder share, 3% treasury.</li>
    <li>Reorganisation depths count the recent events the Zycord Lab file keeps; the all-time count and the deepest come from the same file.</li>
+   <li>Fully diluted value (FDV) for Zycord uses 61,836,900 ZCD: everything the decaying schedule issues up to height 12,602,879 (about September 2038), computed exactly from Zycord's emission parameters. A tail of 0.33 ZCD per block follows, so Zycord has no fixed maximum supply.</li>
    <li>Days on target: full UTC days whose average block time is between 28.5 and 31.5 seconds.</li>
    <li>Busiest 100 blocks (speed comparison): every run of 100 consecutive blocks since launch, transactions divided by the time the run took.</li>
    <li>The update time at the top turns amber when the figures are more than a day old.</li>
@@ -357,7 +358,7 @@ dialog.sp{max-width:980px}
   </div>
   <div class="out" aria-live="polite">
    <div class="res key"><span>Implied price per ZCD<br>(your break-even cost)</span><b id="mc-price">—</b></div>
-   <div class="res key"><span>Implied ZCD FDV<br>(price × 62.7M long-run supply)</span><b id="mc-fdv">—</b></div>
+   <div class="res key"><span>Implied ZCD FDV<br>(price × 61.8M, the supply issued by 2038)</span><b id="mc-fdv">—</b></div>
    <div class="res"><span>ZCD you mine per day</span><b id="mc-zcd">—</b></div>
    <div class="res"><span>Electricity cost per day</span><b id="mc-cost">—</b></div>
    <div class="res"><span>Your share of the network</span><b id="mc-share">—</b></div>
@@ -372,7 +373,7 @@ dialog.sp{max-width:980px}
  <p>Brilliant Nodes mines and holds ZCD. Nothing here is investment advice.</p>
  <p>Data built <span id="f-built">—</span> UTC, updated every hour. Charts drawn with d3 (ISC licence).</p>
  <p>Supply for data sites (plain text, updated every hour): <a href="data/total-supply.txt">total supply</a> · <a href="data/circulating-supply.txt">circulating supply</a> · <a href="data/supply.json">details (JSON)</a>.</p>
- <p>Zycord Pulse <b>v1.1</b> · Source code, data builders and open data: <a href="https://github.com/brilliantnodes/zycord-pulse" rel="noopener">github.com/brilliantnodes/zycord-pulse</a> (MIT licence).</p>
+ <p>Zycord Pulse <b>v1.2</b> · Source code, data builders and open data: <a href="https://github.com/brilliantnodes/zycord-pulse" rel="noopener">github.com/brilliantnodes/zycord-pulse</a> (MIT licence).</p>
 </div></footer>
 
 <script src="vendor/d3.v7.min.js"></script>
@@ -520,7 +521,7 @@ dialog.sp{max-width:980px}
     set('m-days', fmt(Math.round((toB * 30) / 86400))); set('m-blocks', fmt(toB));
     const pct = (100 * Math.min(h, 182 * E)) / (182 * E); set('m-pct', f1(pct)); $('m-bar').style.width = pct + '%';
     // issued supply (v9)
-    const CAP = 62.7e6, sp = (100 * sup) / CAP;
+    const CAP = 61836900.03, sp = (100 * sup) / CAP;
     set('s-pct', fmt(Math.round(sup)) + ' ZCD (' + f2(sp) + '%)'); $('s-bar').style.width = Math.max(0.5, sp) + '%';
     const parts = [['To miners (94%)', 0.94, 'var(--c1)'], ['Founder share (3%)', 0.03, 'var(--c2)'], ['Treasury (3%)', 0.03, 'var(--c3)']];
     $('s-split').innerHTML = parts.map((p) => '<i style="width:' + p[1] * 100 + '%;background:' + p[2] + '"></i>').join('');
@@ -816,7 +817,7 @@ dialog.sp{max-width:980px}
       set('mc-cost', '$' + d3.format(',.2f')(cost));
       if (zcd > 0 && cost > 0) {
         const p = cost / zcd;
-        set('mc-price', usd(p)); set('mc-fdv', big(p * 62.7e6)); set('mc-mcap', supplyNow ? big(p * supplyNow) : '—'); window.ZP_MINE_FDV = p * 62.7e6;
+        set('mc-price', usd(p)); set('mc-fdv', big(p * 61836900.03)); set('mc-mcap', supplyNow ? big(p * supplyNow) : '—'); window.ZP_MINE_FDV = p * 61836900.03;
       } else { set('mc-price', zcd > 0 ? '$0 (free power)' : '—'); set('mc-fdv', '—'); set('mc-mcap', '—'); window.ZP_MINE_FDV = null; }
       document.dispatchEvent(new Event('zp-mine'));
     }

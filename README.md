@@ -6,7 +6,7 @@ Zycord Pulse shows how the Zycord blockchain is used and how it runs: transactio
 network hashrate, block times, reorganisations, the delivery record of scheduled upgrades, issued supply and the road
 to staking. Every chain figure is read from every block on a Zycord full node and decoded with Zycord's own code.
 
-Version **1.1** (24 November 2026): adds the supply endpoints. Version 1.0: 24 November 2026.
+Version **1.2** (24 November 2026): supply wording and FDV use the exact 61.8 million. 1.1: supply endpoints. 1.0: first release.
 
 ## What is on the page
 
