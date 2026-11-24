@@ -515,7 +515,8 @@ dialog.sp{max-width:980px}
   const h = N.height, ep = Math.floor(h / E), into = h - ep * E;
   const srow = D.schedule.find((r) => +r.epoch === ep);
   if (srow) {
-    const rew = +srow.reward_per_block, sup = +srow.supply + rew * into, toB = Math.max(0, 182 * E - h);
+    const rew = +srow.reward_per_block, toB = Math.max(0, 182 * E - h);
+    const sup = (D.supply_exact && D.supply_exact.height === h) ? +D.supply_exact.total : +srow.supply + rew * into;  // v1.2: exact when available
     set('m-rew', f2(rew)); set('m-miner', f2(rew * 0.94)); set('m-epoch', fmt(ep)); set('m-inep', fmt(into + 1));
     set('m-day', fmt(Math.round(rew * E))); set('m-sup', fmt(Math.round(sup)));
     set('m-days', fmt(Math.round((toB * 30) / 86400))); set('m-blocks', fmt(toB));
@@ -801,7 +802,7 @@ dialog.sp{max-width:980px}
     const netDefault = Math.round(last.hash * 100) / 100;
     const ep = Math.floor(N.height / E); const sr = D.schedule.find((r) => +r.epoch === ep);
     const rewMiner = sr ? +sr.reward_per_block * 0.94 : 18.9;
-    const supplyNow = sr ? +sr.supply + +sr.reward_per_block * (N.height - ep * E) : null;
+    const supplyNow = (D.supply_exact && D.supply_exact.height === N.height) ? +D.supply_exact.total : (sr ? +sr.supply + +sr.reward_per_block * (N.height - ep * E) : null);
     const usd = (v) => (v >= 1 ? '$' + d3.format(',.2f')(v) : v >= 0.01 ? '$' + d3.format('.4f')(v) : '$' + d3.format('.6f')(v));
     const big = (v) => (v >= 1e9 ? '$' + d3.format('.2f')(v / 1e9) + 'B' : v >= 1e6 ? '$' + d3.format('.2f')(v / 1e6) + 'M' : '$' + d3.format(',.0f')(v));
     const pick = () => { const c = CPUS[+sel.value]; if (c[1] !== '') { $('mc-hash').value = c[1]; $('mc-watt').value = c[2]; } calc(); };

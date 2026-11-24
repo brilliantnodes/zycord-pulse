@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Zycord Pulse site data builder (v5, Zycord Pulse v1.1: also writes the supply endpoints).
+"""Zycord Pulse site data builder (v6, Zycord Pulse v1.2: supply endpoints, and the exact supply inside pulse.json).
 
 Inputs:  the current data/pulse.json (keeps the reward schedule, milestones, development figures, sources and
          the delivery list), the daily aggregate (pulse_agg.py) and the node snapshot (export_now.py).
@@ -48,6 +48,13 @@ if RG.get("recent_len"):
                          recent_from_height=RG["recent_from_height"], recent_to_height=RG["recent_to_height"],
                          recent_by_depth=RG["by_depth"])
 new["daily"] = [{k: v for k, v in d.items() if k != "kinds"} for d in days]
+# v6: exact supply at the node height, so the page shows the same figure as the supply endpoints
+import importlib.util
+_spec = importlib.util.spec_from_file_location("zp_supply", os.path.join(os.path.dirname(os.path.abspath(__file__)), "supply.py"))
+_sup = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_sup)
+_t, _f, _tr = _sup.supply_at(int(new["now"]["height"]))
+new["supply_exact"] = dict(height=int(new["now"]["height"]), total=_t / _sup.UNIT, circulating=(_t - _tr) / _sup.UNIT,
+                           treasury=_tr / _sup.UNIT, founder=_f / _sup.UNIT)
 new["downloads"] = ["data/pulse_daily.csv", "data/pulse_schedule.csv", "data/pulse.json"]
 REORG_SRC = "Reorganisation depths: the most recent events kept in the Zycord Lab network file; the all-time count and deepest come from the same file."
 new["sources"] = list(dict.fromkeys(list(old.get("sources", [])) + [REORG_SRC]))
