@@ -6,7 +6,7 @@ Zycord Pulse shows how the Zycord blockchain is used and how it runs: transactio
 network hashrate, block times, reorganisations, the delivery record of scheduled upgrades, issued supply and the road
 to staking. Every chain figure is read from every block on a Zycord full node and decoded with Zycord's own code.
 
-Version **1.0** (24 November 2026).
+Version **1.1** (24 November 2026): adds the supply endpoints. Version 1.0: 24 November 2026.
 
 ## What is on the page
 
@@ -29,6 +29,25 @@ How each number is measured is set out on the page itself, in the **Methods** se
 - [`data/pulse.json`](data/pulse.json): everything the page draws.
 
 The data holds counts and shares only. It names no address and no key.
+
+## Supply endpoints
+
+Plain-text numbers in ZCD, for data sites such as CoinGecko and CoinMarketCap. They are rebuilt every hour at our node's current height.
+
+| Endpoint | Value |
+|---|---|
+| [`/data/total-supply.txt`](https://pulse.brilliantnodes.com/data/total-supply.txt) | Every ZCD created by block subsidies so far. |
+| [`/data/circulating-supply.txt`](https://pulse.brilliantnodes.com/data/circulating-supply.txt) | Total supply minus the treasury, which is held by the protocol. |
+| [`/data/supply.json`](https://pulse.brilliantnodes.com/data/supply.json) | Both, with the height, the treasury, the founder allocation and the definitions. |
+
+[`tools/supply.py`](tools/supply.py) computes these exactly, to the base unit, from Zycord's own emission parameters
+(`tools/pulsescan/params_mainnet.json`, zycord-node v0.7.1). It reproduces the totals quoted in those parameters:
+62,744,838.47 ZCD for the decaying schedule, 907,917.44 ZCD withheld by the slow start, and 61,836,900.03 ZCD issued
+before the tail emission of 0.33 ZCD per block begins at height 12,602,880. Zycord has no fixed maximum supply.
+
+- The founder's 3% of each block subsidy (until height 3,153,600) is credited straight to the founder's address and counted as circulating.
+- Transaction fees are not part of the subsidy and are not counted.
+- Coins in the 240-block maturity window are counted once their block exists.
 
 ## Run it yourself
 

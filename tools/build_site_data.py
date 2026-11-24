@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Zycord Pulse site data builder (v4, Zycord Pulse v1.0).
+"""Zycord Pulse site data builder (v5, Zycord Pulse v1.1: also writes the supply endpoints).
 
 Inputs:  the current data/pulse.json (keeps the reward schedule, milestones, development figures, sources and
          the delivery list), the daily aggregate (pulse_agg.py) and the node snapshot (export_now.py).
-Outputs: pulse.json, pulse.js, pulse_daily.csv, pulse_schedule.csv in OUT_DIR. Counts and shares only: no addresses.
+Outputs: pulse.json, pulse.js, pulse_daily.csv, pulse_schedule.csv, total-supply.txt, circulating-supply.txt and
+         supply.json in OUT_DIR. Counts and shares only: no addresses.
 
 usage: build_site_data.py CURRENT_PULSE_JSON DAILY_JSON NOW_JSON OUT_DIR
 """
@@ -76,4 +77,8 @@ def sched_csv(f):
     for r in old["schedule"]:
         w.writerow([r.get(c, "") for c in sc])
 write("pulse_schedule.csv", sched_csv)
+# supply endpoints (v5): exact, from Zycord's emission parameters, at the node's height
+import subprocess
+subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "supply.py"),
+                str(new["now"]["height"]), out], check=True, stdout=subprocess.DEVNULL)
 print("built", new["built_utc"], "height", new["now"]["height"], "days", len(days))

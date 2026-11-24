@@ -313,6 +313,7 @@ dialog.sp{max-width:980px}
    <tr><td>Development</td><td>Public repository, dev branch</td><td>Counted by hand; date shown in the section</td></tr>
    <tr><td>Market statistics</td><td>CoinGecko</td><td>Live in your browser (30-minute cache); saved snapshot, refreshed every 6 hours, if CoinGecko cannot be reached</td></tr>
    <tr><td>Speed comparison</td><td>Chainspect; Zycord row from our node</td><td>Snapshot, date shown in the panel</td></tr>
+   <tr><td>Supply endpoints</td><td>Zycord's emission parameters, at our node's height</td><td>Every hour; exact to the base unit</td></tr>
    <tr><td>Mine Zycord calculator</td><td>Public CPU benchmarks; network figure from our node</td><td>CPU figures are approximate</td></tr>
   </tbody></table></div>
   <details class="notes" open><summary>How each number is measured</summary><ul>
@@ -324,6 +325,7 @@ dialog.sp{max-width:980px}
    <li>Days are UTC. The newest day is a part day until midnight UTC.</li>
    <li>Development figures count the public dev branch; lines include tests. A contributor is a distinct commit author.</li>
    <li>Fees burned are not shown: past fee levels are not kept by the node, so they cannot be measured exactly from block history.</li>
+   <li>Supply endpoints: total supply is every ZCD created by block subsidies up to our node's height, computed exactly from Zycord's emission parameters; circulating supply is total supply minus the treasury. The founder's 3% is counted as circulating. Fees are not counted.</li>
    <li>Issued supply follows Zycord's reward schedule up to the current block. The split uses the rule in the code: 94% to the miner, 3% founder share, 3% treasury.</li>
    <li>Reorganisation depths count the recent events the Zycord Lab file keeps; the all-time count and the deepest come from the same file.</li>
    <li>Days on target: full UTC days whose average block time is between 28.5 and 31.5 seconds.</li>
@@ -369,7 +371,8 @@ dialog.sp{max-width:980px}
  <p><b>Zycord Pulse</b> is an independent dashboard built and run by <a href="https://brilliantnodes.com" rel="noopener">Brilliant Nodes</a>. It is not affiliated with or endorsed by the Zycord project.</p>
  <p>Brilliant Nodes mines and holds ZCD. Nothing here is investment advice.</p>
  <p>Data built <span id="f-built">—</span> UTC, updated every hour. Charts drawn with d3 (ISC licence).</p>
- <p>Zycord Pulse <b>v1.0</b> · Source code, data builders and open data: <a href="https://github.com/brilliantnodes/zycord-pulse" rel="noopener">github.com/brilliantnodes/zycord-pulse</a> (MIT licence).</p>
+ <p>Supply for data sites (plain text, updated every hour): <a href="data/total-supply.txt">total supply</a> · <a href="data/circulating-supply.txt">circulating supply</a> · <a href="data/supply.json">details (JSON)</a>.</p>
+ <p>Zycord Pulse <b>v1.1</b> · Source code, data builders and open data: <a href="https://github.com/brilliantnodes/zycord-pulse" rel="noopener">github.com/brilliantnodes/zycord-pulse</a> (MIT licence).</p>
 </div></footer>
 
 <script src="vendor/d3.v7.min.js"></script>
