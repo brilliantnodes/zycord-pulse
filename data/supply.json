@@ -1,0 +1,19 @@
+{
+ "height": 139381,
+ "computed_utc": "2026-11-24T10:07:56Z",
+ "unit": "ZCD",
+ "total_supply": "1954220.84477034",
+ "circulating_supply": "1895594.22008102",
+ "treasury": "58626.62468932",
+ "founder_allocation": "58626.62468932",
+ "to_block_producers": "1836967.59539170",
+ "max_supply": null,
+ "notes": {
+  "total_supply": "Every ZCD created by block subsidies up to this height, computed exactly from Zycord's emission parameters.",
+  "circulating_supply": "Total supply minus the treasury, which is held by the protocol.",
+  "founder_allocation": "3% of each block subsidy until height 3,153,600, credited directly to the founder's address. Counted as circulating.",
+  "max_supply": "None. The decaying schedule issues 61,836,900.03 ZCD up to height 12,602,879; after that a tail of 0.33 ZCD per block continues.",
+  "fees": "Transaction fees are not part of the subsidy and are not counted."
+ },
+ "source": "https://github.com/brilliantnodes/zycord-pulse/blob/main/tools/supply.py"
+}
